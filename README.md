@@ -1,5 +1,9 @@
 # gomatrix (WIP)
 
+[![pipeline status](https://git.noc.ruhr-uni-bochum.de/danieljankowski/gomatrix/badges/master/pipeline.svg)](https://git.noc.ruhr-uni-bochum.de/danieljankowski/gomatrix/commits/master)
+[![coverage report](https://git.noc.ruhr-uni-bochum.de/danieljankowski/gomatrix/badges/master/coverage.svg)](https://git.noc.ruhr-uni-bochum.de/danieljankowski/gomatrix/commits/master)
+
+
 A go package for scientific matrix operations.
 
 

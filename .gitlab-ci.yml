@@ -5,7 +5,7 @@ variables:
     GIT_STRATEGY: clone
 
 services:
-    - docker:dind
+    - golang
 
 test:
     tags:

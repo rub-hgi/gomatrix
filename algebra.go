@@ -1,6 +1,6 @@
 package gomatrix
 
-// Add adds two matrices
+// AddMatrix adds two matrices
 //
 // This function adds a matrix to the matrix object. The result will be saved
 // in the object, whose AddMatrix method was called.

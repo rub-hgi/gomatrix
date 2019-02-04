@@ -1,0 +1,84 @@
+image: docker:stable
+
+variables:
+    DOCKER_DRIVER: overlay2
+    GIT_STRATEGY: clone
+
+services:
+    - docker:dind
+
+test:
+    tags:
+        - docker
+    stage: test
+    image: golang
+    script:
+        # create the directory for the go package
+        - mkdir -p /go/src/git.noc.ruhr-uni-bochum.de/danieljankowski/gomatrix
+        # copy everything into the right place
+        - cp -R $CI_PROJECT_DIR/* /go/src/git.noc.ruhr-uni-bochum.de/danieljankowski/gomatrix/.
+        # install the dep
+        - go get -u github.com/golang/dep/cmd/dep
+        # change directory into the go package and prepare the tests
+        - cd /go/src/git.noc.ruhr-uni-bochum.de/danieljankowski/gomatrix
+        # install the dependencies
+        - dep ensure
+        - mkdir report/
+        - export GOCACHE=off
+        # run the tests with coverage report
+        - go test -coverprofile report/cover.out -covermode=count ./...
+        # convert the coverage report to html and copy it back into the project directory
+        - go tool cover -html=report/cover.out -o report/cover.html
+        - cp -R report $CI_PROJECT_DIR/.
+    artifacts:
+        paths:
+            - ./report
+        expire_in: 1 week
+
+lint:
+    tags:
+        - docker
+    stage: test
+    image: golang
+    script:
+        # create the directory for the go package
+        - mkdir -p /go/src/git.noc.ruhr-uni-bochum.de/danieljankowski/gomatrix
+        # copy everything into the right place
+        - cp -R $CI_PROJECT_DIR/* /go/src/git.noc.ruhr-uni-bochum.de/danieljankowski/gomatrix/.
+        # install the dep
+        - go get -u github.com/golang/dep/cmd/dep
+        # change directory into the go package and prepare the tests
+        - cd /go/src/git.noc.ruhr-uni-bochum.de/danieljankowski/gomatrix
+        # install the dependencies
+        - dep ensure
+        - mkdir report/
+        - export GOCACHE=off
+        # install golint
+        - go get -u golang.org/x/lint/golint
+        # run the tests with coverage report
+        - golint -set_exit_status $(go list ./... | grep -v /vendor/)
+
+memory-sanitizer:
+    tags:
+        - docker
+    stage: test
+    image: golang
+    script:
+        # install clang
+        - export DEBIAN_FRONTEND=noninteractive
+        - apt update
+        - apt install -y clang
+        # create the directory for the go package
+        - mkdir -p /go/src/git.noc.ruhr-uni-bochum.de/danieljankowski/gomatrix
+        # copy everything into the right place
+        - cp -R $CI_PROJECT_DIR/* /go/src/git.noc.ruhr-uni-bochum.de/danieljankowski/gomatrix/.
+        # install the dep
+        - go get -u github.com/golang/dep/cmd/dep
+        # change directory into the go package and prepare the tests
+        - cd /go/src/git.noc.ruhr-uni-bochum.de/danieljankowski/gomatrix
+        # install the dependencies
+        - dep ensure
+        - mkdir report/
+        - export GOCACHE=off
+        # run the tests with coverage report
+        - CC=clang go test -msan -short $(go list ./... | grep -v /vendor/)

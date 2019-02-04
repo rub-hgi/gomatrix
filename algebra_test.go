@@ -1,7 +1,6 @@
 package gomatrix
 
 import (
-	"fmt"
 	"math/big"
 	"testing"
 

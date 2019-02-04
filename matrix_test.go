@@ -76,3 +76,85 @@ func TestSet(t *testing.T) {
 		}
 	}
 }
+
+func TestAt(t *testing.T) {
+	tests := []struct {
+		description    string
+		matrix         *F2
+		i              int
+		j              int
+		expectedError  bool
+		expectedResult int
+	}{
+		{
+			description:    "success",
+			matrix:         NewF2(2, 2).Set([]*big.Int{big.NewInt(2), big.NewInt(1)}),
+			i:              0,
+			j:              1,
+			expectedError:  false,
+			expectedResult: 1,
+		},
+		{
+			description:    "success",
+			matrix:         NewF2(2, 2).Set([]*big.Int{big.NewInt(2), big.NewInt(1)}),
+			i:              1,
+			j:              1,
+			expectedError:  false,
+			expectedResult: 0,
+		},
+		{
+			description:    "invalid j",
+			matrix:         NewF2(2, 2).Set([]*big.Int{big.NewInt(2), big.NewInt(1)}),
+			i:              1,
+			j:              3,
+			expectedError:  true,
+			expectedResult: 0,
+		},
+	}
+
+	for _, test := range tests {
+		result, err := test.matrix.At(test.i, test.j)
+
+		assert.Equal(t, test.expectedError, err != nil)
+
+		if err != nil {
+			continue
+		}
+
+		assert.Equal(t, test.expectedResult, result)
+	}
+}
+
+func TestEqual(t *testing.T) {
+	tests := []struct {
+		description    string
+		matrixA        *F2
+		matrixB        *F2
+		expectedResult bool
+	}{
+		{
+			description:    "equal matrices",
+			matrixA:        NewF2(2, 2).Set([]*big.Int{big.NewInt(2), big.NewInt(1)}),
+			matrixB:        NewF2(2, 2).Set([]*big.Int{big.NewInt(2), big.NewInt(1)}),
+			expectedResult: true,
+		},
+		{
+			description:    "inequal matrices",
+			matrixA:        NewF2(2, 2).Set([]*big.Int{big.NewInt(2), big.NewInt(1)}),
+			matrixB:        NewF2(2, 2).Set([]*big.Int{big.NewInt(2), big.NewInt(2)}),
+			expectedResult: false,
+		},
+		{
+			description:    "different dimensions",
+			matrixA:        NewF2(2, 3).Set([]*big.Int{big.NewInt(2), big.NewInt(1)}),
+			matrixB:        NewF2(2, 2).Set([]*big.Int{big.NewInt(2), big.NewInt(1)}),
+			expectedResult: false,
+		},
+	}
+
+	for _, test := range tests {
+		result := test.matrixA.IsEqual(test.matrixB)
+
+		assert.Equal(t, test.expectedResult, result)
+	}
+}

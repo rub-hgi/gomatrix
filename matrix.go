@@ -1,6 +1,7 @@
 package gomatrix
 
 import (
+	"fmt"
 	"math/big"
 )
 
@@ -66,4 +67,58 @@ func (f *F2) Set(data []*big.Int) *F2 {
 
 	// return success
 	return f
+}
+
+// At returns the value at index i, j
+//
+// @param int i The row index
+// @param int j The column index
+//
+// @return int, error|nil
+func (f *F2) At(i, j int) (int, error) {
+	// check if the indice are in the matrix
+	if i >= f.N || j >= f.M {
+		return -1, fmt.Errorf("Index out of bounds")
+	}
+
+	// create the bitmask for the value selection
+	bitmask := big.NewInt(0).SetBit(big.NewInt(0), j, 1)
+
+	// get the bit from the bitmask
+	selectedBit := big.NewInt(0).And(f.Rows[i], bitmask)
+
+	// compare the selected bit with 0. If it's 0, the result is 0. If it's not
+	// zero, the result is 1 or -1. As the And only produces results greater or
+	// equal 0, the result can
+	result := selectedBit.Cmp(big.NewInt(0))
+
+	// return the result
+	return result, nil
+}
+
+// IsEqual checks the equality of the matrix objects
+//
+// This function compares the values of the matrix that is given with the matrix
+// whose function is called.
+//
+// @param *F2 m The matrix to compare with
+//
+// @return bool
+func (f *F2) IsEqual(m *F2) bool {
+	// compare the sizes
+	if f.N != m.N || f.M != m.M {
+		return false
+	}
+
+	// iterate through the rows
+	for i, row := range f.Rows {
+		// if the rew is not equal...
+		if row.Cmp(m.Rows[i]) != 0 {
+			// ...return false
+			return false
+		}
+	}
+
+	// size and values are equal
+	return true
 }

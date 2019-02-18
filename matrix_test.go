@@ -192,3 +192,68 @@ func TestT(t *testing.T) {
 		assert.Equal(t, true, test.matrixA.IsEqual(test.expectedMatrix))
 	}
 }
+
+func TestSetToIdentity(t *testing.T) {
+	tests := []struct {
+		description    string
+		matrixA        *F2
+		expectedMatrix *F2
+	}{
+		{
+			description:    "2x2 matrix",
+			matrixA:        NewF2(2, 2).Set([]*big.Int{big.NewInt(3), big.NewInt(1)}),
+			expectedMatrix: NewF2(2, 2).Set([]*big.Int{big.NewInt(1), big.NewInt(2)}),
+		},
+		{
+			description:    "3x2 matrix",
+			matrixA:        NewF2(3, 2).Set([]*big.Int{big.NewInt(3), big.NewInt(1), big.NewInt(2)}),
+			expectedMatrix: NewF2(3, 2).Set([]*big.Int{big.NewInt(1), big.NewInt(2), big.NewInt(0)}),
+		},
+	}
+
+	for _, test := range tests {
+		test.matrixA.SetToIdentity()
+
+		assert.Equal(t, true, test.matrixA.IsEqual(test.expectedMatrix))
+	}
+}
+
+func TestSwapRows(t *testing.T) {
+	tests := []struct {
+		description    string
+		matrixA        *F2
+		i              int
+		j              int
+		expectedMatrix *F2
+		expectedError  bool
+	}{
+		{
+			description:    "2x2 matrix",
+			matrixA:        NewF2(2, 2).Set([]*big.Int{big.NewInt(3), big.NewInt(1)}),
+			i:              1,
+			j:              0,
+			expectedMatrix: NewF2(2, 2).Set([]*big.Int{big.NewInt(1), big.NewInt(3)}),
+			expectedError:  false,
+		},
+		{
+			description:    "invalid index",
+			matrixA:        NewF2(2, 2).Set([]*big.Int{big.NewInt(3), big.NewInt(1)}),
+			i:              2,
+			j:              0,
+			expectedMatrix: NewF2(2, 2).Set([]*big.Int{big.NewInt(1), big.NewInt(3)}),
+			expectedError:  true,
+		},
+	}
+
+	for _, test := range tests {
+		err := test.matrixA.SwapRows(test.i, test.j)
+
+		assert.Equal(t, test.expectedError, err != nil)
+
+		if err != nil {
+			continue
+		}
+
+		assert.Equal(t, true, test.matrixA.IsEqual(test.expectedMatrix))
+	}
+}

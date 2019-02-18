@@ -172,3 +172,39 @@ func transposeRowToColumn(row *big.Int, rows []*big.Int, columnIndex int) {
 		rows[i].SetBit(rows[i], columnIndex, bit)
 	}
 }
+
+// SetToIdentity sets the matrix to the identity matrix
+//
+// This function sets the identity matrix into f. If f is a non square matrix,
+// the remaining rows/columns will be set to 0.
+func (f *F2) SetToIdentity() {
+	// iterate through the rows
+	for i := 0; i < f.N; i++ {
+		// create a row with 0 only
+		f.Rows[i] = big.NewInt(0)
+
+		// if the column/row counter is greater than the specified dimension...
+		if i >= f.M {
+			// ...skip the 1 value
+			continue
+		}
+
+		// set the i'th bit for the identity matrix
+		f.Rows[i].SetBit(f.Rows[i], i, 1)
+	}
+}
+
+// SwapRows swaps the row at index i with the row at index j
+//
+// @param int i The index of the first row to swap
+// @param int j The index of the second row to swap
+func (f *F2) SwapRows(i, j int) error {
+	if i >= f.N || j >= f.N || i < 0 || j < 0 {
+		return fmt.Errorf("Index does not exist")
+	}
+	// swap the rows
+	f.Rows[i], f.Rows[j] = f.Rows[j], f.Rows[i]
+
+	// return success
+	return nil
+}

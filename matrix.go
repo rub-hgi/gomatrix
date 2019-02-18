@@ -198,12 +198,42 @@ func (f *F2) SetToIdentity() {
 //
 // @param int i The index of the first row to swap
 // @param int j The index of the second row to swap
+//
+// @return error
 func (f *F2) SwapRows(i, j int) error {
+	// check for input parameters
 	if i >= f.N || j >= f.N || i < 0 || j < 0 {
 		return fmt.Errorf("Index does not exist")
 	}
 	// swap the rows
 	f.Rows[i], f.Rows[j] = f.Rows[j], f.Rows[i]
+
+	// return success
+	return nil
+}
+
+// SwapCols swaps the columns at index i with the row at index j
+//
+// @param int i The index of the first columns to swap
+// @param int j The index of the second columns to swap
+//
+// @return error
+func (f *F2) SwapCols(i, j int) error {
+	// check for input parameters
+	if i >= f.M || j >= f.M || i < 0 || j < 0 {
+		return fmt.Errorf("Index does not exist")
+	}
+
+	// iterate through the rows
+	for _, row := range f.Rows {
+		// get the bit with the given index
+		bitI := row.Bit(i)
+		bitJ := row.Bit(j)
+
+		// set the swapped bits
+		row.SetBit(row, i, bitJ)
+		row.SetBit(row, j, bitI)
+	}
 
 	// return success
 	return nil

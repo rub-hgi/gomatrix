@@ -122,3 +122,53 @@ func (f *F2) IsEqual(m *F2) bool {
 	// size and values are equal
 	return true
 }
+
+// T transposes matrix f
+//
+// @return error
+func (f *F2) T() error {
+	// create the result matrix
+	var resultRows []*big.Int
+
+	// initialize the result matrix with 0
+	for i := 0; i < f.M; i++ {
+		resultRows = append(
+			resultRows,
+			big.NewInt(0),
+		)
+	}
+
+	// iterate through the rows
+	for i, row := range f.Rows {
+		// transpose the row to a column
+		rowToColumn(row, resultRows, i)
+	}
+
+	// save the result matrix
+	f.Rows = resultRows
+
+	// save the dimensions
+	f.N, f.M = f.M, f.N
+
+	// return success
+	return nil
+}
+
+// rowToColumn transpose the row into the specified column
+//
+// This function creates a column at the columnIndex in rows by
+// the given row.
+//
+// @param *big.Int   row         The row to transpose
+// @param []*big.Int rows        The result matrix
+// @param int        columnIndex The index of the column to create
+func rowToColumn(row *big.Int, rows []*big.Int, columnIndex int) {
+	// iterate through the rows
+	for i := range rows {
+		// get the bit from the row
+		bit := row.Bit(i)
+
+		// set the bit to the column index
+		rows[i].SetBit(rows[i], columnIndex, bit)
+	}
+}

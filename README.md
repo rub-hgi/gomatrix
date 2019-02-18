@@ -18,6 +18,6 @@ A go package for scientific matrix operations.
   - [ ] DivMatrix
   - [ ] InvertMatrix
   - [ ] Partial gauss
-  - [ ] Transpose
+  - [x] Transpose
   - [ ] Permutate
 - [ ] More todos...

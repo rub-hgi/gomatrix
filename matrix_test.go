@@ -1,7 +1,6 @@
 package gomatrix
 
 import (
-	_ "fmt"
 	"math/big"
 	"testing"
 
@@ -156,5 +155,40 @@ func TestEqual(t *testing.T) {
 		result := test.matrixA.IsEqual(test.matrixB)
 
 		assert.Equal(t, test.expectedResult, result)
+	}
+}
+
+func TestT(t *testing.T) {
+	tests := []struct {
+		description    string
+		matrixA        *F2
+		expectedError  bool
+		expectedMatrix *F2
+	}{
+		{
+			description:    "small matrix",
+			matrixA:        NewF2(2, 2).Set([]*big.Int{big.NewInt(2), big.NewInt(0)}),
+			expectedError:  false,
+			expectedMatrix: NewF2(2, 2).Set([]*big.Int{big.NewInt(0), big.NewInt(1)}),
+		},
+		{
+			description:    "3x3 matrix",
+			matrixA:        NewF2(3, 3).Set([]*big.Int{big.NewInt(2), big.NewInt(4), big.NewInt(1)}),
+			expectedError:  false,
+			expectedMatrix: NewF2(3, 3).Set([]*big.Int{big.NewInt(4), big.NewInt(1), big.NewInt(2)}),
+		},
+		{
+			description:    "3x2 matrix",
+			matrixA:        NewF2(3, 2).Set([]*big.Int{big.NewInt(3), big.NewInt(1), big.NewInt(0)}),
+			expectedError:  false,
+			expectedMatrix: NewF2(2, 3).Set([]*big.Int{big.NewInt(3), big.NewInt(1)}),
+		},
+	}
+
+	for _, test := range tests {
+		err := test.matrixA.T()
+
+		assert.Equal(t, test.expectedError, err != nil)
+		assert.Equal(t, true, test.matrixA.IsEqual(test.expectedMatrix))
 	}
 }

@@ -141,7 +141,7 @@ func (f *F2) T() error {
 	// iterate through the rows
 	for i, row := range f.Rows {
 		// transpose the row to a column
-		rowToColumn(row, resultRows, i)
+		transposeRowToColumn(row, resultRows, i)
 	}
 
 	// save the result matrix
@@ -154,7 +154,7 @@ func (f *F2) T() error {
 	return nil
 }
 
-// rowToColumn transpose the row into the specified column
+// transposeRowToColumn transpose the row into the specified column
 //
 // This function creates a column at the columnIndex in rows by
 // the given row.
@@ -162,7 +162,7 @@ func (f *F2) T() error {
 // @param *big.Int   row         The row to transpose
 // @param []*big.Int rows        The result matrix
 // @param int        columnIndex The index of the column to create
-func rowToColumn(row *big.Int, rows []*big.Int, columnIndex int) {
+func transposeRowToColumn(row *big.Int, rows []*big.Int, columnIndex int) {
 	// iterate through the rows
 	for i := range rows {
 		// get the bit from the row

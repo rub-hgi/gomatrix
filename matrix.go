@@ -1,6 +1,7 @@
 package gomatrix
 
 import (
+	"crypto/rand"
 	"fmt"
 	"math/big"
 )
@@ -237,4 +238,39 @@ func (f *F2) SwapCols(i, j int) error {
 
 	// return success
 	return nil
+}
+
+// PermuteCols permutes the columns of the matrix randomly
+//
+// This function swaps columns randomly. The swap operation will be repeated
+// on every column. After swapping the columns, the permutation
+// matrix will be returned.
+//
+// @return *F2
+func (f *F2) PermuteCols() *F2 {
+	// initialize the permuation matrix
+	permutationMatrix := NewF2(f.N, f.M)
+
+	// set the permutation matrix to the identity matrix of f
+	permutationMatrix.SetToIdentity()
+
+	// repeat the swaps
+	for i := 0; i < f.M; i++ {
+		// get a random column destination index
+		j, _ := rand.Int(rand.Reader, big.NewInt(int64(f.M)))
+
+		// check if the column is swapped or not
+		if int64(i) == j.Int64() {
+			continue
+		}
+
+		// swap the columns in f
+		f.SwapCols(i, int(j.Int64()))
+
+		// swap the columns in the permutation matrix
+		permutationMatrix.SwapCols(i, int(j.Int64()))
+	}
+
+	// return the permutation matrix
+	return permutationMatrix
 }

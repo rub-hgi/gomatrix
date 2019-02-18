@@ -19,5 +19,5 @@ A go package for scientific matrix operations.
   - [ ] InvertMatrix
   - [ ] Partial gauss
   - [x] Transpose
-  - [ ] Permutate
+  - [x] Permute (cols)
 - [ ] More todos...

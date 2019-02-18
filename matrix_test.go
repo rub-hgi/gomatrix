@@ -71,7 +71,7 @@ func TestSet(t *testing.T) {
 		}
 
 		for i, row := range m.Rows {
-			assert.Equal(t, 0, row.Cmp(test.data[i]))
+			assert.Zero(t, row.Cmp(test.data[i]))
 		}
 	}
 }
@@ -189,7 +189,7 @@ func TestT(t *testing.T) {
 		err := test.matrixA.T()
 
 		assert.Equal(t, test.expectedError, err != nil)
-		assert.Equal(t, true, test.matrixA.IsEqual(test.expectedMatrix))
+		assert.True(t, test.matrixA.IsEqual(test.expectedMatrix))
 	}
 }
 
@@ -214,7 +214,7 @@ func TestSetToIdentity(t *testing.T) {
 	for _, test := range tests {
 		test.matrixA.SetToIdentity()
 
-		assert.Equal(t, true, test.matrixA.IsEqual(test.expectedMatrix))
+		assert.True(t, test.matrixA.IsEqual(test.expectedMatrix))
 	}
 }
 
@@ -254,7 +254,7 @@ func TestSwapRows(t *testing.T) {
 			continue
 		}
 
-		assert.Equal(t, true, test.matrixA.IsEqual(test.expectedMatrix))
+		assert.True(t, test.matrixA.IsEqual(test.expectedMatrix))
 	}
 }
 
@@ -294,6 +294,49 @@ func TestSwapCols(t *testing.T) {
 			continue
 		}
 
-		assert.Equal(t, true, test.matrixA.IsEqual(test.expectedMatrix))
+		assert.True(t, test.matrixA.IsEqual(test.expectedMatrix))
+	}
+}
+
+func TestPermuteCols(t *testing.T) {
+	tests := []struct {
+		description       string
+		maxRepeats        int
+		matrixA           *F2
+		notExpectedMatrix *F2
+	}{
+		{
+			description:       "3x3 matrix",
+			maxRepeats:        9,
+			matrixA:           NewF2(3, 3).Set([]*big.Int{big.NewInt(3), big.NewInt(1), big.NewInt(5)}),
+			notExpectedMatrix: NewF2(3, 3).Set([]*big.Int{big.NewInt(3), big.NewInt(1), big.NewInt(5)}),
+		},
+		{
+			description:       "3x3 matrix",
+			maxRepeats:        9,
+			matrixA:           NewF2(3, 3).Set([]*big.Int{big.NewInt(3), big.NewInt(1), big.NewInt(5)}),
+			notExpectedMatrix: NewF2(3, 3).Set([]*big.Int{big.NewInt(3), big.NewInt(1), big.NewInt(5)}),
+		},
+		{
+			description:       "3x3 matrix",
+			maxRepeats:        9,
+			matrixA:           NewF2(3, 3).Set([]*big.Int{big.NewInt(3), big.NewInt(1), big.NewInt(5)}),
+			notExpectedMatrix: NewF2(3, 3).Set([]*big.Int{big.NewInt(3), big.NewInt(1), big.NewInt(5)}),
+		},
+	}
+
+	for _, test := range tests {
+		repeats := 0
+
+		var permMat *F2
+
+		for test.matrixA.IsEqual(test.notExpectedMatrix) && repeats < test.maxRepeats {
+			repeats++
+
+			permMat = test.matrixA.PermuteCols()
+		}
+
+		assert.False(t, test.matrixA.IsEqual(test.notExpectedMatrix))
+		assert.NotNil(t, permMat)
 	}
 }

@@ -1,3 +1,4 @@
+// Package gomatrix Is a go package for scientific operations with matrices in F2.
 package gomatrix
 
 import (

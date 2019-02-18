@@ -274,3 +274,31 @@ func (f *F2) PermuteCols() *F2 {
 	// return the permutation matrix
 	return permutationMatrix
 }
+
+// GetCol returns the column at index i
+//
+// This function returns the column as big.Int after the index is verified.
+// If an invalid index is used, the function returns nil.
+//
+// @param int i The index for the column
+//
+// @return *big.Int
+func (f *F2) GetCol(i int) *big.Int {
+	// check for input parameters
+	if i < 0 || i >= f.M {
+		// return nil
+		return nil
+	}
+
+	// initialize the output big.Int
+	output := big.NewInt(0)
+
+	// iterate through the rows
+	for j, row := range f.Rows {
+		// the the corresponding bit
+		output.SetBit(output, j, row.Bit(i))
+	}
+
+	// return the result
+	return output
+}

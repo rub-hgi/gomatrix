@@ -340,3 +340,37 @@ func TestPermuteCols(t *testing.T) {
 		assert.NotNil(t, permMat)
 	}
 }
+
+func TestGetCol(t *testing.T) {
+	tests := []struct {
+		description    string
+		matrixA        *F2
+		colIndex       int
+		expectedResult *big.Int
+	}{
+		{
+			description:    "first column of a 2x2 matrix",
+			matrixA:        NewF2(2, 2).Set([]*big.Int{big.NewInt(2), big.NewInt(1)}),
+			colIndex:       0,
+			expectedResult: big.NewInt(2),
+		},
+		{
+			description:    "second column of a 2x2 matrix",
+			matrixA:        NewF2(2, 2).Set([]*big.Int{big.NewInt(2), big.NewInt(1)}),
+			colIndex:       1,
+			expectedResult: big.NewInt(1),
+		},
+		{
+			description:    "invalid parameter",
+			matrixA:        NewF2(2, 2).Set([]*big.Int{big.NewInt(2), big.NewInt(1)}),
+			colIndex:       2,
+			expectedResult: nil,
+		},
+	}
+
+	for _, test := range tests {
+		result := test.matrixA.GetCol(test.colIndex)
+
+		assert.Equal(t, test.expectedResult, result)
+	}
+}

@@ -14,7 +14,7 @@ A go package for scientific matrix operations.
   - [x] Set values to matrix
   - [x] AddMatrix
   - [ ] SubMatrix
-  - [ ] MulMatrix
+  - [x] MulMatrix
   - [ ] DivMatrix
   - [ ] InvertMatrix
   - [ ] Partial gauss

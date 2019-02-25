@@ -126,9 +126,7 @@ func (f *F2) IsEqual(m *F2) bool {
 }
 
 // T transposes matrix f
-//
-// @return error
-func (f *F2) T() error {
+func (f *F2) T() {
 	// create the result matrix
 	var resultRows []*big.Int
 
@@ -151,6 +149,41 @@ func (f *F2) T() error {
 
 	// save the dimensions
 	f.N, f.M = f.M, f.N
+}
+
+// PartialT partially transpose the matrix
+//
+// This function partially transposes a matrix. The submatrix that is
+// transposed need to be a square matrix.
+//
+// @param int startRow The row to start
+// @param int startCol The column to start
+// @param int n        The size of the submatrix
+//
+// @return error
+func (f *F2) PartialT(startRow, startCol, n int) error {
+	// verify the given parameters
+	if startRow+n > f.N || startCol+n > f.M {
+		return fmt.Errorf("Cannot partially transpose a non square matrix")
+	}
+
+	// get the submatrix to transpose
+	subMatrix := f.GetSubMatrix(
+		startRow,
+		startCol,
+		startRow+n-1,
+		startCol+n-1,
+	)
+
+	// transpose the submatrix
+	subMatrix.T()
+
+	// set the transposed submatrix into f
+	f.SetSubMatrix(
+		subMatrix,
+		startRow,
+		startCol,
+	)
 
 	// return success
 	return nil
@@ -302,4 +335,108 @@ func (f *F2) GetCol(i int) *big.Int {
 
 	// return the result
 	return output
+}
+
+// GetSubMatrix gets the submatrix with boundaries included
+//
+// @param int startRow The first row to include
+// @param int startCol The first column to include
+// @param int stopRow  The last row to include
+// @param int stopCol  The last column to include
+func (f *F2) GetSubMatrix(startRow, startCol, stopRow, stopCol int) *F2 {
+	// create the output matrix
+	output := NewF2(stopRow-startRow+1, stopCol-startCol+1)
+
+	// calculate the bitlength
+	bitLength := stopCol - startCol
+
+	// create the bitmask
+	bitMask := big.NewInt(0).Exp(
+		big.NewInt(2), big.NewInt(int64(bitLength+1)), nil,
+	)
+
+	// decrease the bitmask by one
+	bitMask.Sub(bitMask, big.NewInt(1))
+
+	// shift the bitmask to the correct position
+	bitMask.Lsh(bitMask, uint(startCol))
+
+	// initialize the rows for the output
+	var rows []*big.Int
+
+	// iterate through the given rows
+	for i := startRow; i <= stopRow; i++ {
+		// get the bits with the bitmask
+		outputRow := big.NewInt(0).And(f.Rows[i], bitMask)
+
+		// shift the completely to the right
+		outputRow.Rsh(outputRow, uint(startCol))
+
+		// save the row
+		rows = append(
+			rows,
+			outputRow,
+		)
+	}
+
+	// return the matrix with the rows set
+	return output.Set(rows)
+}
+
+// SetSubMatrix sets the submatrix into the current matrix
+//
+// @param *F2 m        The submatrix to use
+// @param int startRow The first row to replace
+// @param int startCol The first column to replace
+//
+// @return *F2, error
+func (f *F2) SetSubMatrix(m *F2, startRow, startCol int) (*F2, error) {
+	// verify that the dimensions fit
+	if (m.N+startRow) > f.N || (m.M+startCol) > f.M {
+		return nil, fmt.Errorf("Submatrix too large")
+	}
+
+	// create the bitmask
+	bitMask := big.NewInt(0).Exp(
+		big.NewInt(2), big.NewInt(int64(m.M)), nil,
+	)
+
+	// decrease the bitmask by one
+	bitMask.Sub(bitMask, big.NewInt(1))
+
+	// shift the bitmask to the correct position
+	bitMask.Lsh(bitMask, uint(startCol))
+
+	// create the output matrix
+	output := NewF2(f.N, f.M).Set(f.Rows)
+
+	// iterate through the rows
+	for i := startRow; i < (m.N + startRow); i++ {
+		// get the bits that are going to be replaced from the current matrix
+		subBitMask := big.NewInt(0).And(
+			f.Rows[i],
+			bitMask,
+		)
+
+		// xor the bits with themselves in order to set the to 0
+		subBitMask.Xor(
+			f.Rows[i],
+			subBitMask,
+		)
+
+		// xor the shifted bits from the submatrix into the "erased" space
+		outputBits := big.NewInt(0).Xor(
+			subBitMask,
+			big.NewInt(0).Lsh(m.Rows[i-startRow], uint(startCol)),
+		)
+
+		// save the row
+		output.Rows[i] = outputBits
+	}
+
+	// set the rows back into f
+	f.Set(output.Rows)
+
+	// return success
+	return f, nil
 }

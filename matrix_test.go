@@ -162,34 +162,76 @@ func TestT(t *testing.T) {
 	tests := []struct {
 		description    string
 		matrixA        *F2
-		expectedError  bool
 		expectedMatrix *F2
 	}{
 		{
 			description:    "small matrix",
 			matrixA:        NewF2(2, 2).Set([]*big.Int{big.NewInt(2), big.NewInt(0)}),
-			expectedError:  false,
 			expectedMatrix: NewF2(2, 2).Set([]*big.Int{big.NewInt(0), big.NewInt(1)}),
 		},
 		{
 			description:    "3x3 matrix",
 			matrixA:        NewF2(3, 3).Set([]*big.Int{big.NewInt(2), big.NewInt(4), big.NewInt(1)}),
-			expectedError:  false,
 			expectedMatrix: NewF2(3, 3).Set([]*big.Int{big.NewInt(4), big.NewInt(1), big.NewInt(2)}),
 		},
 		{
 			description:    "3x2 matrix",
 			matrixA:        NewF2(3, 2).Set([]*big.Int{big.NewInt(3), big.NewInt(1), big.NewInt(0)}),
-			expectedError:  false,
 			expectedMatrix: NewF2(2, 3).Set([]*big.Int{big.NewInt(3), big.NewInt(1)}),
 		},
 	}
 
 	for _, test := range tests {
-		err := test.matrixA.T()
+		test.matrixA.T()
 
-		assert.Equal(t, test.expectedError, err != nil)
 		assert.True(t, test.matrixA.IsEqual(test.expectedMatrix))
+	}
+}
+
+func TestPartialT(t *testing.T) {
+	tests := []struct {
+		description    string
+		matrix         *F2
+		startRow       int
+		startCol       int
+		n              int
+		expectedMatrix *F2
+		expectedError  bool
+	}{
+		{
+			description:    "3x3",
+			matrix:         NewF2(3, 3).Set([]*big.Int{big.NewInt(5), big.NewInt(6), big.NewInt(4)}),
+			startRow:       1,
+			startCol:       1,
+			n:              2,
+			expectedMatrix: NewF2(3, 3).Set([]*big.Int{big.NewInt(5), big.NewInt(2), big.NewInt(6)}),
+			expectedError:  false,
+		},
+		{
+			description:    "n too big for selected startRow and startCol",
+			matrix:         NewF2(3, 3).Set([]*big.Int{big.NewInt(5), big.NewInt(6), big.NewInt(4)}),
+			startRow:       1,
+			startCol:       1,
+			n:              3,
+			expectedMatrix: NewF2(3, 3).Set([]*big.Int{big.NewInt(5), big.NewInt(2), big.NewInt(6)}),
+			expectedError:  true,
+		},
+	}
+
+	for _, test := range tests {
+		err := test.matrix.PartialT(
+			test.startRow,
+			test.startCol,
+			test.n,
+		)
+
+		assert.Equalf(t, test.expectedError, err != nil, test.description)
+
+		if err != nil {
+			continue
+		}
+
+		assert.Truef(t, test.expectedMatrix.IsEqual(test.matrix), test.description)
 	}
 }
 
@@ -372,5 +414,115 @@ func TestGetCol(t *testing.T) {
 		result := test.matrixA.GetCol(test.colIndex)
 
 		assert.Equal(t, test.expectedResult, result)
+	}
+}
+
+func TestGetSubMatrix(t *testing.T) {
+	tests := []struct {
+		description    string
+		matrix         *F2
+		startRow       int
+		startCol       int
+		stopRow        int
+		stopCol        int
+		expectedMatrix *F2
+	}{
+		{
+			matrix: NewF2(3, 4).Set([]*big.Int{
+				big.NewInt(10),
+				big.NewInt(9),
+				big.NewInt(6),
+			}),
+			startRow: 0,
+			startCol: 1,
+			stopRow:  1,
+			stopCol:  3,
+			expectedMatrix: NewF2(2, 3).Set([]*big.Int{
+				big.NewInt(5),
+				big.NewInt(4),
+			}),
+		},
+		{
+			matrix: NewF2(3, 3).Set([]*big.Int{
+				big.NewInt(5),
+				big.NewInt(6),
+				big.NewInt(4),
+			}),
+			startRow: 1,
+			startCol: 1,
+			stopRow:  2,
+			stopCol:  2,
+			expectedMatrix: NewF2(2, 2).Set([]*big.Int{
+				big.NewInt(3),
+				big.NewInt(2),
+			}),
+		},
+	}
+
+	for _, test := range tests {
+		result := test.matrix.GetSubMatrix(
+			test.startRow,
+			test.startCol,
+			test.stopRow,
+			test.stopCol,
+		)
+
+		assert.True(t, test.expectedMatrix.IsEqual(result))
+	}
+}
+
+func TestSetSubMatrix(t *testing.T) {
+	tests := []struct {
+		description    string
+		matrix         *F2
+		submatrix      *F2
+		startRow       int
+		startCol       int
+		expectedError  bool
+		expectedMatrix *F2
+	}{
+		{
+			description:    "1x6",
+			matrix:         NewF2(1, 6).Set([]*big.Int{big.NewInt(22)}),
+			submatrix:      NewF2(1, 3).Set([]*big.Int{big.NewInt(1)}),
+			startRow:       0,
+			startCol:       3,
+			expectedError:  false,
+			expectedMatrix: NewF2(1, 6).Set([]*big.Int{big.NewInt(14)}),
+		},
+		{
+			description:    "3x3",
+			matrix:         NewF2(3, 3).Set([]*big.Int{big.NewInt(5), big.NewInt(6), big.NewInt(4)}),
+			submatrix:      NewF2(2, 2).Set([]*big.Int{big.NewInt(3), big.NewInt(0)}),
+			startRow:       0,
+			startCol:       1,
+			expectedError:  false,
+			expectedMatrix: NewF2(3, 3).Set([]*big.Int{big.NewInt(7), big.NewInt(0), big.NewInt(4)}),
+		},
+		{
+			description:    "submatrix too big",
+			matrix:         NewF2(3, 3).Set([]*big.Int{big.NewInt(5), big.NewInt(6), big.NewInt(4)}),
+			submatrix:      NewF2(2, 4).Set([]*big.Int{big.NewInt(3), big.NewInt(0)}),
+			startRow:       1,
+			startCol:       1,
+			expectedError:  true,
+			expectedMatrix: nil,
+		},
+	}
+
+	for _, test := range tests {
+		result, err := test.matrix.SetSubMatrix(
+			test.submatrix,
+			test.startRow,
+			test.startCol,
+		)
+
+		assert.Equalf(t, test.expectedError, err != nil, test.description)
+
+		if err != nil {
+			continue
+		}
+
+		assert.Truef(t, test.expectedMatrix.IsEqual(result), test.description)
 	}
 }

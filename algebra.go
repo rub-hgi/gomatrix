@@ -95,3 +95,32 @@ func addBits(number *big.Int) uint {
 	// return the result
 	return result
 }
+
+// PartialXor xors the bits from startCol to stopCol
+//
+// @param *big.Int x        The base number to xor
+// @param *big.Int y        The number with the bits to xor
+// @param int      startCol The start index of the bitmask
+// @param int      stopCol  The stop index of the bitmask
+//
+// @return *big.Int
+func PartialXor(x, y *big.Int, startCol, stopCol int) *big.Int {
+	bitLength := stopCol - startCol
+
+	// create the bitmask
+	bitMask := big.NewInt(0).Exp(
+		big.NewInt(2), big.NewInt(int64(bitLength+1)), nil,
+	)
+
+	// decrease the bitmask by one
+	bitMask.Sub(bitMask, big.NewInt(1))
+
+	// shift the bitmask to the correct position
+	bitMask.Lsh(bitMask, uint(startCol))
+
+	// get the bits to xor
+	bitsToXor := big.NewInt(0).And(y, bitMask)
+
+	// return the result
+	return big.NewInt(0).Xor(x, bitsToXor)
+}

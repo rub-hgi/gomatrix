@@ -58,3 +58,71 @@ func (f *F2) diagonalize() {
 		}
 	}
 }
+
+// PartialGaussianElimination performs a gaussian elimination on a part of the matrix
+func (f *F2) PartialGaussianElimination(startRow, startCol, stopRow, stopCol int) {
+	// iterate through all possible pivot bits
+	for pivotBit := startCol; pivotBit <= stopCol; pivotBit++ {
+		// iterate through the rows
+		for rowCounter := startRow + pivotBit - startCol; rowCounter <= stopRow; rowCounter++ {
+			// if the pivotbit of this row is 0...
+			if f.Rows[rowCounter].Bit(pivotBit) == uint(0) {
+				// ...check the next row
+				continue
+			}
+
+			// if the row with a valid pivot bit is not the first row...
+			if pivotBit-startCol != rowCounter {
+				// ...swap it with first one
+				f.SwapRows(pivotBit-startCol, rowCounter)
+			}
+
+			// iterate through all other rows except the first one
+			for rr := startRow + pivotBit - startCol + 1; rr <= stopRow; rr++ {
+				if f.Rows[rr].Bit(pivotBit) == uint(0) {
+					continue
+				}
+
+				// substract the 1 from all other rows with the pivotBit
+				f.Rows[rr] = PartialXor(
+					f.Rows[rr],
+					f.Rows[pivotBit-startCol],
+					startCol,
+					stopCol,
+				)
+			}
+
+			break
+		}
+	}
+
+	// do the same thing backwards to get the identity matrix
+	f.partialDiagonalize(startRow, startCol, stopRow, stopCol)
+}
+
+func (f *F2) partialDiagonalize(startRow, startCol, stopRow, stopCol int) {
+	// iterate backwards through the pivot bits
+	for pivotBit := stopCol; pivotBit >= startCol; pivotBit-- {
+		// choose each row from the top row to the one with the pivot bit
+		for rowCounter := startRow; rowCounter < stopRow; rowCounter++ {
+			// prevent xor with the row itself
+			if rowCounter == pivotBit-startCol {
+				continue
+			}
+
+			// if the bit in the same position at the other row is 0...
+			if f.Rows[rowCounter].Bit(pivotBit) == uint(0) {
+				// ...continue to the next row
+				continue
+			}
+
+			// eliminate the 1
+			f.Rows[rowCounter] = PartialXor(
+				f.Rows[rowCounter],
+				f.Rows[pivotBit-startCol],
+				startCol,
+				stopCol,
+			)
+		}
+	}
+}

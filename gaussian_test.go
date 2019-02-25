@@ -30,3 +30,63 @@ func TestGaussianElimination(t *testing.T) {
 		assert.True(t, test.matrixA.IsEqual(test.expectedMatrix))
 	}
 }
+
+func TestPartialGaussianElimination(t *testing.T) {
+	tests := []struct {
+		description    string
+		matrixA        *F2
+		startRow       int
+		startCol       int
+		stopRow        int
+		stopCol        int
+		expectedMatrix *F2
+	}{
+		{
+			matrixA: NewF2(4, 4).Set([]*big.Int{
+				big.NewInt(10),
+				big.NewInt(7),
+				big.NewInt(4),
+				big.NewInt(1),
+			}),
+			startRow: 0,
+			stopRow:  2,
+			startCol: 1,
+			stopCol:  3,
+			expectedMatrix: NewF2(4, 4).Set([]*big.Int{
+				big.NewInt(2),
+				big.NewInt(5),
+				big.NewInt(8),
+				big.NewInt(1),
+			}),
+		},
+		{
+			matrixA: NewF2(4, 4).Set([]*big.Int{
+				big.NewInt(4),
+				big.NewInt(10),
+				big.NewInt(7),
+				big.NewInt(1),
+			}),
+			startRow: 0,
+			stopRow:  2,
+			startCol: 1,
+			stopCol:  3,
+			expectedMatrix: NewF2(4, 4).Set([]*big.Int{
+				big.NewInt(2),
+				big.NewInt(4),
+				big.NewInt(9),
+				big.NewInt(1),
+			}),
+		},
+	}
+
+	for _, test := range tests {
+		test.matrixA.PartialGaussianElimination(
+			test.startRow,
+			test.startCol,
+			test.stopRow,
+			test.stopCol,
+		)
+
+		assert.True(t, test.matrixA.IsEqual(test.expectedMatrix))
+	}
+}

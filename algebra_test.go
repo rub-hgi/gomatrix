@@ -99,3 +99,40 @@ func TestAddBits(t *testing.T) {
 		assert.Equal(t, test.expectedResult, result)
 	}
 }
+
+func TestPartialXor(t *testing.T) {
+	tests := []struct {
+		description    string
+		x              *big.Int
+		y              *big.Int
+		startCol       int
+		stopCol        int
+		expectedResult *big.Int
+	}{
+		{
+			x:              big.NewInt(10),
+			y:              big.NewInt(6),
+			startCol:       0,
+			stopCol:        4,
+			expectedResult: big.NewInt(12),
+		},
+		{
+			x:              big.NewInt(6),
+			y:              big.NewInt(10),
+			startCol:       1,
+			stopCol:        2,
+			expectedResult: big.NewInt(4),
+		},
+	}
+
+	for _, test := range tests {
+		result := PartialXor(
+			test.x,
+			test.y,
+			test.startCol,
+			test.stopCol,
+		)
+
+		assert.Equal(t, 0, test.expectedResult.Cmp(result))
+	}
+}

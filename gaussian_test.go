@@ -15,8 +15,12 @@ func TestGaussianElimination(t *testing.T) {
 		expectedMatrix *F2
 	}{
 		{
-			matrixA:        NewF2(2, 2).Set([]*big.Int{big.NewInt(2), big.NewInt(1)}),
-			expectedMatrix: NewF2(2, 2).Set([]*big.Int{big.NewInt(1), big.NewInt(3)}),
+			matrixA:        NewF2(3, 3).Set([]*big.Int{big.NewInt(5), big.NewInt(3), big.NewInt(2)}),
+			expectedMatrix: NewF2(3, 3).Set([]*big.Int{big.NewInt(1), big.NewInt(2), big.NewInt(4)}),
+		},
+		{
+			matrixA:        NewF2(3, 3).Set([]*big.Int{big.NewInt(2), big.NewInt(5), big.NewInt(3)}),
+			expectedMatrix: NewF2(3, 3).Set([]*big.Int{big.NewInt(1), big.NewInt(2), big.NewInt(4)}),
 		},
 	}
 

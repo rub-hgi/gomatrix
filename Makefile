@@ -10,7 +10,7 @@ BINARY_NAME=pcs-implementation
 BINARY_LINUX=$(BINARY_NAME)_linux
 BINARY_WINDOWS=$(BINARY_NAME).exe
 BINARY_MACOS=$(BINARY_NAME)_macos
-TEST_FILES := $($(GOCMD) list ./... | grep -v /vendor/)
+TEST_FILES := $(shell $(GOCMD) list ./...)
 
 all: deps test
 build: 

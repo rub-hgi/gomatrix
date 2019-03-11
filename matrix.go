@@ -9,7 +9,7 @@ import (
 
 // F2 represents a matrix with entries that contains 0 or 1
 //
-// Each row consists of one big Int with arbitray size. Each column is one bit
+// Each row consists of one big Int with arbitrary size. Each column is one bit
 // at 2**(column_index) of the big Int in each row.
 type F2 struct {
 	N    int

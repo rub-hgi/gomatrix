@@ -1,4 +1,3 @@
-// Package gomatrix Is a go package for scientific operations with matrices in F2.
 package gomatrix
 
 // GaussianElimination converts the matrix to an echelon form

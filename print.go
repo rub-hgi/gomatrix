@@ -1,4 +1,3 @@
-// Package gomatrix Is a go package for scientific operations with matrices in F2.
 package gomatrix
 
 import (
@@ -7,26 +6,26 @@ import (
 
 // PrettyPrint prints the matrix to stdout
 func (f *F2) PrettyPrint() {
-	f.printWithSeperators(" ", "\n")
+	f.printWithSeparators(" ", "\n")
 }
 
 // PrintLaTex prints the matrix as latex code
 func (f *F2) PrintLaTex() {
 	fmt.Printf("\\begin{bmatrix}\n")
-	f.printWithSeperators(" & ", "\\\n")
+	f.printWithSeparators(" & ", "\\\n")
 	fmt.Printf("\\end{bmatrix}\n")
 }
 
 // PrintCSV prints the matrix as csv
 func (f *F2) PrintCSV() {
-	f.printWithSeperators(", ", "\n")
+	f.printWithSeparators(", ", "\n")
 }
 
-// printWithSeperators prints the matrix with custom seperators
+// printWithSeparators prints the matrix with custom seperators
 //
-// @param string valSep  The seperator for the single values
-// @param string lineSep The line seperator
-func (f *F2) printWithSeperators(valSep, lineSep string) {
+// @param string valSep  The separator for the single values
+// @param string lineSep The line separator
+func (f *F2) printWithSeparators(valSep, lineSep string) {
 	for _, row := range f.Rows {
 		for i := 0; i < f.M; i++ {
 			if i == f.M-1 {

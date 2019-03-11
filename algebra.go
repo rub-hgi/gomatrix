@@ -1,4 +1,3 @@
-// Package gomatrix Is a go package for scientific operations with matrices in F2.
 package gomatrix
 
 import (
@@ -43,7 +42,7 @@ func (f *F2) AddMatrix(m *F2) *F2 {
 func (f *F2) MulMatrix(m *F2) *F2 {
 	// if the dimensions do not fit for a multiplication...
 	if f.N != m.M {
-		// ...retrun an error
+		// ...return an error
 		return nil
 	}
 
@@ -96,26 +95,26 @@ func addBits(number *big.Int) uint {
 	return result
 }
 
-// PartialXor xors the bits from startCol to stopCol
+// PartialXor xor's the bits from startCol to stopCol
 //
 // @param *big.Int x        The base number to xor
 // @param *big.Int y        The number with the bits to xor
-// @param int      startCol The start index of the bitmask
-// @param int      stopCol  The stop index of the bitmask
+// @param int      startCol The start index of the bit mask
+// @param int      stopCol  The stop index of the bit mask
 //
 // @return *big.Int
 func PartialXor(x, y *big.Int, startCol, stopCol int) *big.Int {
 	bitLength := stopCol - startCol
 
-	// create the bitmask
+	// create the bit mask
 	bitMask := big.NewInt(0).Exp(
 		big.NewInt(2), big.NewInt(int64(bitLength+1)), nil,
 	)
 
-	// decrease the bitmask by one
+	// decrease the bit mask by one
 	bitMask.Sub(bitMask, big.NewInt(1))
 
-	// shift the bitmask to the correct position
+	// shift the bit mask to the correct position
 	bitMask.Lsh(bitMask, uint(startCol))
 
 	// get the bits to xor

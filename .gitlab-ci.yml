@@ -24,9 +24,8 @@ test:
         # install the dependencies
         - dep ensure
         - mkdir report/
-        - export GOCACHE=off
         # run the tests with coverage report
-        - go test -coverprofile report/cover.out -covermode=count ./...
+        - go test -count=1 -coverprofile report/cover.out -covermode=count ./...
         # convert the coverage report to html and copy it back into the project directory
         - go tool cover -html=report/cover.out -o report/cover.html
         - cp -R report $CI_PROJECT_DIR/.
@@ -52,7 +51,6 @@ lint:
         # install the dependencies
         - dep ensure
         - mkdir report/
-        - export GOCACHE=off
         # install golint
         - go get -u golang.org/x/lint/golint
         # run the tests with coverage report
@@ -79,6 +77,5 @@ memory-sanitizer:
         # install the dependencies
         - dep ensure
         - mkdir report/
-        - export GOCACHE=off
         # run the tests with coverage report
-        - CC=clang go test -msan -short $(go list ./... | grep -v /vendor/)
+        - CC=clang go test -count=1 -msan -short $(go list ./... | grep -v /vendor/)

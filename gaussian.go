@@ -140,16 +140,23 @@ func (f *F2) partialDiagonalize(startRow, startCol, stopRow, stopCol int) {
 func (f *F2) CheckGaussian(startRow, startCol, n int) bool {
 	counter := 0
 
-	// iterate through the rows
-	for _, row := range f.Rows[startRow:] {
-		// if the counter is reached...
-		if counter == n {
-			// ...break
-			break
-		}
+	// create the bitmask for the bits to check
+	bitmask := big.NewInt(0).SetBit(
+		big.NewInt(0),
+		n,
+		1,
+	)
 
-		// create the bitmask for the row
-		bitmask := big.NewInt(0).SetBit(
+	bitmask = bitmask.Sub(bitmask, big.NewInt(1))
+	bitmask = bitmask.Lsh(bitmask, uint(startCol))
+
+	// iterate through the rows
+	for i := startRow; i < startRow+n; i++ {
+		// get the row
+		row := f.Rows[i]
+
+		// calculate the expected result if it is in echelon form
+		expectedBits := big.NewInt(0).SetBit(
 			big.NewInt(0),
 			startCol+counter,
 			1,
@@ -164,7 +171,7 @@ func (f *F2) CheckGaussian(startRow, startCol, n int) bool {
 		// xor the bits to check with the bitmask
 		shouldBeZero := big.NewInt(0).Xor(
 			bitsToCheck,
-			bitmask,
+			expectedBits,
 		)
 
 		// if the xor'ed result is not zero...

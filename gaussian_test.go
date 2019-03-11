@@ -115,8 +115,8 @@ func TestCheckGaussian(t *testing.T) {
 		{
 			description: "3x3 matrix",
 			matrix: NewF2(3, 3).Set([]*big.Int{
+				big.NewInt(3),
 				big.NewInt(2),
-				big.NewInt(1),
 				big.NewInt(4),
 			}),
 			startRow:       0,
@@ -133,7 +133,7 @@ func TestCheckGaussian(t *testing.T) {
 			}),
 			startRow:       1,
 			startCol:       1,
-			n:              3,
+			n:              2,
 			expectedResult: true,
 		},
 		{
@@ -151,6 +151,7 @@ func TestCheckGaussian(t *testing.T) {
 	}
 
 	for _, test := range tests {
+		test.matrix.PrettyPrint()
 		result := test.matrix.CheckGaussian(
 			test.startRow,
 			test.startCol,

@@ -27,7 +27,7 @@ func (f *F2) GaussianElimination() {
 					continue
 				}
 
-				// substract the 1 from all other rows with the pivotBit
+				// subtract the 1 from all other rows with the pivotBit
 				f.Rows[rr].Xor(f.Rows[rr], f.Rows[pivotBit])
 			}
 		}
@@ -82,7 +82,7 @@ func (f *F2) PartialGaussianElimination(startRow, startCol, stopRow, stopCol int
 					continue
 				}
 
-				// substract the 1 from all other rows with the pivotBit
+				// subtract the 1 from all other rows with the pivotBit
 				f.Rows[rr] = PartialXor(
 					f.Rows[rr],
 					f.Rows[pivotBit-startCol],

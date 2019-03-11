@@ -435,8 +435,8 @@ func TestGetSubMatrix(t *testing.T) {
 			}),
 			startRow: 0,
 			startCol: 1,
-			stopRow:  1,
-			stopCol:  3,
+			stopRow:  2,
+			stopCol:  4,
 			expectedMatrix: NewF2(2, 3).Set([]*big.Int{
 				big.NewInt(5),
 				big.NewInt(4),
@@ -450,8 +450,8 @@ func TestGetSubMatrix(t *testing.T) {
 			}),
 			startRow: 1,
 			startCol: 1,
-			stopRow:  2,
-			stopCol:  2,
+			stopRow:  3,
+			stopCol:  3,
 			expectedMatrix: NewF2(2, 2).Set([]*big.Int{
 				big.NewInt(3),
 				big.NewInt(2),

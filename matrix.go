@@ -173,8 +173,8 @@ func (f *F2) PartialT(startRow, startCol, n int) error {
 	subMatrix := f.GetSubMatrix(
 		startRow,
 		startCol,
-		startRow+n-1,
-		startCol+n-1,
+		startRow+n,
+		startCol+n,
 	)
 
 	// transpose the submatrix
@@ -214,7 +214,7 @@ func transposeRowToColumn(row *big.Int, rows []*big.Int, columnIndex int) {
 //
 // This function sets the identity matrix into f. If f is a non square matrix,
 // the remaining rows/columns will be set to 0.
-func (f *F2) SetToIdentity() {
+func (f *F2) SetToIdentity() *F2 {
 	// iterate through the rows
 	for i := 0; i < f.N; i++ {
 		// create a row with 0 only
@@ -229,6 +229,8 @@ func (f *F2) SetToIdentity() {
 		// set the i'th bit for the identity matrix
 		f.Rows[i].SetBit(f.Rows[i], i, 1)
 	}
+
+	return f
 }
 
 // SwapRows swaps the row at index i with the row at index j
@@ -347,10 +349,10 @@ func (f *F2) GetCol(i int) *big.Int {
 // @param int stopCol  The last column to include
 func (f *F2) GetSubMatrix(startRow, startCol, stopRow, stopCol int) *F2 {
 	// create the output matrix
-	output := NewF2(stopRow-startRow+1, stopCol-startCol+1)
+	output := NewF2(stopRow-startRow, stopCol-startCol)
 
 	// calculate the bitlength
-	bitLength := stopCol - startCol
+	bitLength := stopCol - startCol - 1
 
 	// create the bitmask
 	bitMask := big.NewInt(0).Exp(
@@ -367,7 +369,7 @@ func (f *F2) GetSubMatrix(startRow, startCol, stopRow, stopCol int) *F2 {
 	var rows []*big.Int
 
 	// iterate through the given rows
-	for i := startRow; i <= stopRow; i++ {
+	for i := startRow; i < stopRow; i++ {
 		// get the bits with the bitmask
 		outputRow := big.NewInt(0).And(f.Rows[i], bitMask)
 

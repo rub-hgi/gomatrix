@@ -1,8 +1,12 @@
 package gomatrix
 
+import (
+	"math/big"
+)
+
 // GaussianElimination converts the matrix to an echelon form
 //
-// This function applies the gaussian elemination to the matrix in order to
+// This function applies the gaussian elimination to the matrix in order to
 // create an echelon form.
 func (f *F2) GaussianElimination() {
 	// iterate through all possible pivot bits
@@ -124,4 +128,54 @@ func (f *F2) partialDiagonalize(startRow, startCol, stopRow, stopCol int) {
 			)
 		}
 	}
+}
+
+// CheckGaussian checks if the given range in the matrix is the identity matrix
+//
+// @param int startRow The row where the check starts
+// @param int startCol The column where the check starts
+// @param int n        The size of the submatrix to check
+//
+// @return bool
+func (f *F2) CheckGaussian(startRow, startCol, n int) bool {
+	counter := 0
+
+	// iterate through the rows
+	for _, row := range f.Rows[startRow:] {
+		// if the counter is reached...
+		if counter == n {
+			// ...break
+			break
+		}
+
+		// create the bitmask for the row
+		bitmask := big.NewInt(0).SetBit(
+			big.NewInt(0),
+			startCol+counter,
+			1,
+		)
+
+		// get the bits to check
+		bitsToCheck := big.NewInt(0).And(
+			row,
+			bitmask,
+		)
+
+		// xor the bits to check with the bitmask
+		shouldBeZero := big.NewInt(0).Xor(
+			bitsToCheck,
+			bitmask,
+		)
+
+		// if the xor'ed result is not zero...
+		if shouldBeZero.Cmp(big.NewInt(0)) != 0 {
+			// ...the check failed
+			return false
+		}
+
+		// increase the counter
+		counter++
+	}
+
+	return true
 }

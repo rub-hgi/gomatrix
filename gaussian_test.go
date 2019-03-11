@@ -90,3 +90,73 @@ func TestPartialGaussianElimination(t *testing.T) {
 		assert.True(t, test.matrixA.IsEqual(test.expectedMatrix))
 	}
 }
+
+func TestCheckGaussian(t *testing.T) {
+	tests := []struct {
+		description    string
+		matrix         *F2
+		startRow       int
+		startCol       int
+		n              int
+		expectedResult bool
+	}{
+		{
+			description: "3x3 identity matrix",
+			matrix: NewF2(3, 3).Set([]*big.Int{
+				big.NewInt(1),
+				big.NewInt(2),
+				big.NewInt(4),
+			}),
+			startRow:       0,
+			startCol:       0,
+			n:              3,
+			expectedResult: true,
+		},
+		{
+			description: "3x3 matrix",
+			matrix: NewF2(3, 3).Set([]*big.Int{
+				big.NewInt(2),
+				big.NewInt(1),
+				big.NewInt(4),
+			}),
+			startRow:       0,
+			startCol:       0,
+			n:              3,
+			expectedResult: false,
+		},
+		{
+			description: "3x3 matrix with lower right identity matrix",
+			matrix: NewF2(3, 3).Set([]*big.Int{
+				big.NewInt(2),
+				big.NewInt(2),
+				big.NewInt(4),
+			}),
+			startRow:       1,
+			startCol:       1,
+			n:              3,
+			expectedResult: true,
+		},
+		{
+			description: "3x3 matrix with upper left identity matrix",
+			matrix: NewF2(3, 3).Set([]*big.Int{
+				big.NewInt(1),
+				big.NewInt(2),
+				big.NewInt(7),
+			}),
+			startRow:       0,
+			startCol:       0,
+			n:              2,
+			expectedResult: true,
+		},
+	}
+
+	for _, test := range tests {
+		result := test.matrix.CheckGaussian(
+			test.startRow,
+			test.startCol,
+			test.n,
+		)
+
+		assert.Equalf(t, test.expectedResult, result, test.description)
+	}
+}

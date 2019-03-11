@@ -126,7 +126,7 @@ func (f *F2) IsEqual(m *F2) bool {
 }
 
 // T transposes matrix f
-func (f *F2) T() {
+func (f *F2) T() *F2 {
 	// create the result matrix
 	var resultRows []*big.Int
 
@@ -149,6 +149,8 @@ func (f *F2) T() {
 
 	// save the dimensions
 	f.N, f.M = f.M, f.N
+
+	return f
 }
 
 // PartialT partially transpose the matrix

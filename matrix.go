@@ -287,7 +287,7 @@ func (f *F2) SwapCols(i, j int) error {
 // @return *F2
 func (f *F2) PermuteCols() *F2 {
 	// initialize the permuation matrix
-	permutationMatrix := NewF2(f.N, f.M)
+	permutationMatrix := NewF2(f.M, f.M)
 
 	// set the permutation matrix to the identity matrix of f
 	permutationMatrix.SetToIdentity()

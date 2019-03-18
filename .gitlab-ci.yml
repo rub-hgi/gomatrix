@@ -3,6 +3,7 @@ image: docker:stable
 variables:
     DOCKER_DRIVER: overlay2
     GIT_STRATEGY: clone
+    GO111MODULE: "on"
 
 services:
     - golang
@@ -17,12 +18,10 @@ test:
         - mkdir -p /go/src/git.noc.ruhr-uni-bochum.de/danieljankowski/gomatrix
         # copy everything into the right place
         - cp -R $CI_PROJECT_DIR/* /go/src/git.noc.ruhr-uni-bochum.de/danieljankowski/gomatrix/.
-        # install the dep
-        - go get -u github.com/golang/dep/cmd/dep
         # change directory into the go package and prepare the tests
         - cd /go/src/git.noc.ruhr-uni-bochum.de/danieljankowski/gomatrix
         # install the dependencies
-        - dep ensure
+        - go mod vendor
         - mkdir report/
         # run the tests with coverage report
         - go test -count=1 -coverprofile report/cover.out -covermode=count ./...
@@ -44,12 +43,10 @@ lint:
         - mkdir -p /go/src/git.noc.ruhr-uni-bochum.de/danieljankowski/gomatrix
         # copy everything into the right place
         - cp -R $CI_PROJECT_DIR/* /go/src/git.noc.ruhr-uni-bochum.de/danieljankowski/gomatrix/.
-        # install the dep
-        - go get -u github.com/golang/dep/cmd/dep
         # change directory into the go package and prepare the tests
         - cd /go/src/git.noc.ruhr-uni-bochum.de/danieljankowski/gomatrix
         # install the dependencies
-        - dep ensure
+        - go mod vendor
         - mkdir report/
         # install golint
         - go get -u golang.org/x/lint/golint
@@ -70,12 +67,10 @@ memory-sanitizer:
         - mkdir -p /go/src/git.noc.ruhr-uni-bochum.de/danieljankowski/gomatrix
         # copy everything into the right place
         - cp -R $CI_PROJECT_DIR/* /go/src/git.noc.ruhr-uni-bochum.de/danieljankowski/gomatrix/.
-        # install the dep
-        - go get -u github.com/golang/dep/cmd/dep
         # change directory into the go package and prepare the tests
         - cd /go/src/git.noc.ruhr-uni-bochum.de/danieljankowski/gomatrix
         # install the dependencies
-        - dep ensure
+        - go mod vendor
         - mkdir report/
         # run the tests with coverage report
         - CC=clang go test -count=1 -msan -short $(go list ./... | grep -v /vendor/)

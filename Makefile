@@ -32,4 +32,4 @@ run:
 		$(GOBUILD) -o $(BINARY_NAME) -v ./...
 		./$(BINARY_NAME)
 deps:
-		dep ensure
+		GO111MODULE=on $(GOCMD) mod vendor

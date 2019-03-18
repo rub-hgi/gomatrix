@@ -12,7 +12,7 @@ func (f *F2) PrettyPrint() {
 // PrintLaTex prints the matrix as latex code
 func (f *F2) PrintLaTex() {
 	fmt.Printf("\\begin{bmatrix}\n")
-	f.printWithSeparators(" & ", "\\\n")
+	f.printWithSeparators(" & ", "\\\\\n")
 	fmt.Printf("\\end{bmatrix}\n")
 }
 

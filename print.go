@@ -9,6 +9,11 @@ func (f *F2) PrettyPrint() {
 	f.printWithSeparators(" ", "\n")
 }
 
+// PrintSlim prints the matrix without whitespaces to stdout
+func (f *F2) PrintSlim() {
+	f.printWithSeparators("", "\n")
+}
+
 // PrintLaTex prints the matrix as latex code
 func (f *F2) PrintLaTex() {
 	fmt.Printf("\\begin{bmatrix}\n")

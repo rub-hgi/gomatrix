@@ -17,6 +17,7 @@ func TestPrettyPrint(t *testing.T) {
 
 	for _, test := range tests {
 		test.matrix.PrettyPrint()
+		test.matrix.PrintSlim()
 		test.matrix.PrintLaTex()
 		test.matrix.PrintCSV()
 	}

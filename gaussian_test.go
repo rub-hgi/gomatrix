@@ -77,6 +77,22 @@ func TestPartialGaussianElimination(t *testing.T) {
 				big.NewInt(1),
 			}),
 		},
+		{
+			matrixA: NewF2(3, 4).Set([]*big.Int{
+				big.NewInt(4),
+				big.NewInt(10),
+				big.NewInt(7),
+			}),
+			startRow: 0,
+			stopRow:  2,
+			startCol: 1,
+			stopCol:  3,
+			expectedMatrix: NewF2(3, 4).Set([]*big.Int{
+				big.NewInt(3),
+				big.NewInt(4),
+				big.NewInt(9),
+			}),
+		},
 	}
 
 	for _, test := range tests {

@@ -53,9 +53,9 @@ func TestPartialGaussianElimination(t *testing.T) {
 			startCol: 1,
 			stopCol:  3,
 			expectedMatrix: NewF2(4, 4).Set([]*big.Int{
-				big.NewInt(2),
-				big.NewInt(5),
-				big.NewInt(8),
+				big.NewInt(3),
+				big.NewInt(4),
+				big.NewInt(9),
 				big.NewInt(1),
 			}),
 		},
@@ -71,7 +71,7 @@ func TestPartialGaussianElimination(t *testing.T) {
 			startCol: 1,
 			stopCol:  3,
 			expectedMatrix: NewF2(4, 4).Set([]*big.Int{
-				big.NewInt(2),
+				big.NewInt(3),
 				big.NewInt(4),
 				big.NewInt(9),
 				big.NewInt(1),
@@ -86,6 +86,8 @@ func TestPartialGaussianElimination(t *testing.T) {
 			test.stopRow,
 			test.stopCol,
 		)
+
+		test.matrixA.PrettyPrint()
 
 		assert.True(t, test.matrixA.IsEqual(test.expectedMatrix))
 	}

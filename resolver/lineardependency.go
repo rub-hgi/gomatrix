@@ -21,7 +21,7 @@ func LinearDependenciesInGauss(
 	pivotBit int,
 ) error {
 	// try to resolve the dependency with a row swap
-	err := resolveWithRowSwap(f, startRow, startCol, stopRow, stopCol, pivotBit)
+	err := resolveWithColSwap(f, startRow, startCol, stopRow, stopCol, pivotBit)
 
 	// if the dependency is resolved...
 	if err == nil {
@@ -30,7 +30,7 @@ func LinearDependenciesInGauss(
 	}
 
 	// try to resolve the dependency with a col swap
-	err = resolveWithColSwap(f, startRow, startCol, stopRow, stopCol, pivotBit)
+	err = resolveWithRowSwap(f, startRow, startCol, stopRow, stopCol, pivotBit)
 
 	// return success
 	return err

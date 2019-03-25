@@ -26,7 +26,7 @@ func TestLinearDependenciesInGauss(t *testing.T) {
 			matrix: gomatrix.NewF2(4, 4).Set([]*big.Int{
 				big.NewInt(10),
 				big.NewInt(13),
-				big.NewInt(1),
+				big.NewInt(0),
 				big.NewInt(14),
 			}),
 			startRow:      0,
@@ -38,8 +38,8 @@ func TestLinearDependenciesInGauss(t *testing.T) {
 			expectedResult: gomatrix.NewF2(4, 4).Set([]*big.Int{
 				big.NewInt(10),
 				big.NewInt(13),
-				big.NewInt(8),
-				big.NewInt(1),
+				big.NewInt(9),
+				big.NewInt(0),
 			}),
 		},
 		{

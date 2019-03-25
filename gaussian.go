@@ -35,6 +35,8 @@ func (f *F2) GaussianElimination() {
 				f.Rows[rr].Xor(f.Rows[rr], f.Rows[pivotBit])
 			}
 		}
+
+		//TODO: detect linear dependency
 	}
 
 	// do the same thing backwards to get the identity matrix
@@ -124,6 +126,88 @@ func (f *F2) partialDiagonalize(startRow, startCol, stopRow, stopCol int) {
 			)
 		}
 	}
+}
+
+// PartialGaussianWithLinearChecking performs a partial gaussian elimination
+//
+// This function performs a gaussian elimination on the matrix and calls the
+// check callback after each iteration in order to verify that linear
+// dependencies in the code could be resolved easily.
+func (f *F2) PartialGaussianWithLinearChecking(
+	startRow int,
+	startCol int,
+	stopRow int,
+	stopCol int,
+	linearCheck func(*F2, int, int, int, int, int) error,
+) error {
+	// iterate through all possible pivot bits
+	for pivotBit := startCol; pivotBit <= stopCol; pivotBit++ {
+		// intialize the pivotbit indicator
+		foundPivotBit := false
+
+		// iterate through the rows
+		for rowCounter := startRow + pivotBit - startCol; rowCounter <= stopRow; rowCounter++ {
+			// if the pivotbit of this row is 0...
+			if f.Rows[rowCounter].Bit(pivotBit) == uint(0) {
+				// ...check the next row
+				continue
+			}
+
+			// if the row with a valid pivot bit is not the first row...
+			if pivotBit-startCol != rowCounter {
+				// ...swap it with first one
+				f.SwapRows(pivotBit-startCol, rowCounter)
+			}
+
+			// iterate through all other rows except the first one
+			for rr := startRow + pivotBit - startCol + 1; rr <= stopRow; rr++ {
+				if f.Rows[rr].Bit(pivotBit) == uint(0) {
+					continue
+				}
+
+				// subtract the 1 from all other rows with the pivotBit
+				f.Rows[rr].Xor(
+					f.Rows[rr],
+					f.Rows[startRow+pivotBit-startCol],
+				)
+			}
+
+			// indicate the pivotbit is found
+			foundPivotBit = true
+
+			// break out of the loop
+			break
+		}
+
+		// if a pivot bit was found...
+		if foundPivotBit {
+			// ...skip to the next row
+			continue
+		}
+
+		// detect linear dependencies and try to resolve them
+		err := linearCheck(
+			f,
+			startRow,
+			startCol,
+			stopRow,
+			stopCol,
+			pivotBit,
+		)
+
+		// check the error
+		if err != nil {
+			return err
+		}
+
+		// process the same row again
+		pivotBit--
+	}
+
+	// do the same thing backwards to get the identity matrix
+	f.partialDiagonalize(startRow, startCol, stopRow, stopCol)
+
+	return nil
 }
 
 // CheckGaussian checks if the given range in the matrix is the identity matrix

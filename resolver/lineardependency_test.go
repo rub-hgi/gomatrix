@@ -1,0 +1,107 @@
+package resolver
+
+import (
+	"math/big"
+	"testing"
+
+	"git.noc.ruhr-uni-bochum.de/danieljankowski/gomatrix"
+
+	"github.com/stretchr/testify/assert"
+)
+
+func TestLinearDependenciesInGauss(t *testing.T) {
+	tests := []struct {
+		description    string
+		matrix         *gomatrix.F2
+		startRow       int
+		startCol       int
+		stopRow        int
+		stopCol        int
+		pivotBit       int
+		expectedError  bool
+		expectedResult *gomatrix.F2
+	}{
+		{
+			description: "simple swap and postprocessing of the row",
+			matrix: gomatrix.NewF2(4, 4).Set([]*big.Int{
+				big.NewInt(10),
+				big.NewInt(13),
+				big.NewInt(1),
+				big.NewInt(14),
+			}),
+			startRow:      0,
+			startCol:      1,
+			stopRow:       2,
+			stopCol:       3,
+			pivotBit:      3,
+			expectedError: false,
+			expectedResult: gomatrix.NewF2(4, 4).Set([]*big.Int{
+				big.NewInt(10),
+				big.NewInt(13),
+				big.NewInt(9),
+				big.NewInt(1),
+			}),
+		},
+		{
+			description: "no row to swap with",
+			matrix: gomatrix.NewF2(4, 4).Set([]*big.Int{
+				big.NewInt(10),
+				big.NewInt(13),
+				big.NewInt(1),
+				big.NewInt(1),
+			}),
+			startRow:      0,
+			startCol:      1,
+			stopRow:       2,
+			stopCol:       3,
+			pivotBit:      3,
+			expectedError: true,
+			expectedResult: gomatrix.NewF2(4, 4).Set([]*big.Int{
+				big.NewInt(10),
+				big.NewInt(13),
+				big.NewInt(9),
+				big.NewInt(1),
+			}),
+		},
+		{
+			description: "simple swap and postprocessing of the row + continue",
+			matrix: gomatrix.NewF2(4, 4).Set([]*big.Int{
+				big.NewInt(10),
+				big.NewInt(13),
+				big.NewInt(1),
+				big.NewInt(10),
+			}),
+			startRow:      0,
+			startCol:      1,
+			stopRow:       2,
+			stopCol:       3,
+			pivotBit:      3,
+			expectedError: false,
+			expectedResult: gomatrix.NewF2(4, 4).Set([]*big.Int{
+				big.NewInt(10),
+				big.NewInt(13),
+				big.NewInt(0),
+				big.NewInt(1),
+			}),
+		},
+	}
+
+	for _, test := range tests {
+		err := LinearDependenciesInGauss(
+			test.matrix,
+			test.startRow,
+			test.startCol,
+			test.stopRow,
+			test.stopCol,
+			test.pivotBit,
+		)
+
+		assert.Equalf(t, test.expectedError, err != nil, test.description)
+
+		if err != nil {
+			continue
+		}
+
+		assert.Truef(t, test.expectedResult.IsEqual(test.matrix), test.description)
+	}
+}

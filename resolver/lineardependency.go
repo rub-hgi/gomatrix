@@ -25,7 +25,6 @@ func LinearDependenciesInGauss(
 
 	// if the dependency is resolved...
 	if err == nil {
-		fmt.Printf("early return\n")
 		// ...return success
 		return nil
 	}

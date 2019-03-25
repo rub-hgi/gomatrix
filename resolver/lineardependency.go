@@ -20,6 +20,33 @@ func LinearDependenciesInGauss(
 	stopCol int,
 	pivotBit int,
 ) error {
+	// try to resolve the dependency with a row swap
+	err := resolveWithRowSwap(f, startRow, startCol, stopRow, stopCol, pivotBit)
+
+	// if the dependency is resolved...
+	if err == nil {
+		fmt.Printf("early return\n")
+		// ...return success
+		return nil
+	}
+
+	// try to resolve the dependency with a col swap
+	err = resolveWithColSwap(f, startRow, startCol, stopRow, stopCol, pivotBit)
+
+	// return success
+	return err
+}
+
+// resolveWithRowSwap tries to resolve the linear dependency by swapping the row
+// with another one
+func resolveWithRowSwap(
+	f *gomatrix.F2,
+	startRow int,
+	startCol int,
+	stopRow int,
+	stopCol int,
+	pivotBit int,
+) error {
 	// create a bitmask for the row check
 	bitmask := big.NewInt(0).SetBit(big.NewInt(0), stopCol-startCol+1, 1)
 	bitmask = bitmask.Sub(bitmask, big.NewInt(1))
@@ -77,6 +104,54 @@ func LinearDependenciesInGauss(
 			f.Rows[pivotBit-startCol],
 			f.Rows[startRow+i-startCol],
 		)
+	}
+
+	// return success
+	return nil
+}
+
+// resolveWithRowSwap tries to resolve the linear dependency by swapping the column
+// with another one
+func resolveWithColSwap(
+	f *gomatrix.F2,
+	startRow int,
+	startCol int,
+	stopRow int,
+	stopCol int,
+	pivotBit int,
+) error {
+	// get the current row as the pivot bit is indexed over the whole matrix
+	rowIndex := pivotBit - startCol
+
+	foundValidCol := false
+
+	// iterate through the colummns
+	for i := 0; i < f.M; i++ {
+		// skip the columns that are used in the gaussian elimination
+		if i >= startCol && i <= stopCol {
+			continue
+		}
+
+		// if the bit is 0...
+		if f.Rows[rowIndex].Bit(i) == uint(0) {
+			// ...the row is skipped
+			continue
+		}
+
+		// swap the columns
+		f.SwapCols(i, pivotBit)
+
+		// indicate that a correct column was swapped right into the place
+		foundValidCol = true
+
+		// break out of the loop
+		break
+	}
+
+	// if no valid column was found...
+	if !foundValidCol {
+		// ...return an error
+		return fmt.Errorf("cannot resolve linear dependency")
 	}
 
 	// return success

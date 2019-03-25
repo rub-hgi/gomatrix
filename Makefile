@@ -16,9 +16,9 @@ all: deps test
 build: 
 		$(GOBUILD) -o $(BINARY_PATH)$(BINARY_NAME) -v
 test: 
-		$(GOTEST) -v -short -covermode=count $(TEST_FILES)
+		$(GOTEST) -v -count=1 -short -covermode=count $(TEST_FILES)
 		$(GOLINT) -set_exit_status $(TEST_FILES)
-		CC=clang $(GOTEST) -v -msan -short $(TEST_FILES)
+		CC=clang $(GOTEST) -v -count=1 -msan -short $(TEST_FILES)
 test-coverage:
 		$(GOTEST) -v -count=1 -short -covermode=count -coverprofile report/cover.out $(TEST_FILES)
 		$(GOCMD) tool cover -html=report/cover.out -o report/cover.html

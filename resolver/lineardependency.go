@@ -25,6 +25,7 @@ func LinearDependenciesInGauss(
 	bitmask = bitmask.Sub(bitmask, big.NewInt(1))
 	bitmask = bitmask.Lsh(bitmask, uint(startCol))
 
+	// initialize the indicator if a valid row is found
 	foundValidRow := false
 
 	// iterate through the rows
@@ -49,28 +50,35 @@ func LinearDependenciesInGauss(
 		// swap the rows
 		f.SwapRows(pivotBit-1, index)
 
+		// a valid row was swapped into the right place
 		foundValidRow = true
 
 		// exit the loop
 		break
 	}
 
+	// if no valid row was found...
 	if !foundValidRow {
+		// ...return an error
 		return fmt.Errorf("cannot resolve linear dependency")
 	}
 
+	// apply the previous operations on the new row, with iterating through
+	// the columns 'til the pivot bit is reached
 	for i := startCol; i < pivotBit; i++ {
+		// if the column is zero...
 		if f.Rows[pivotBit-startCol].Bit(i) == uint(0) {
+			// ...skip to the next column
 			continue
 		}
 
-		fmt.Printf("%d xor %d\n", pivotBit-startCol, startRow+i-startCol)
-
+		// remove the 1 with a xor operation with the relating row
 		f.Rows[pivotBit-startCol].Xor(
 			f.Rows[pivotBit-startCol],
 			f.Rows[startRow+i-startCol],
 		)
 	}
 
+	// return success
 	return nil
 }

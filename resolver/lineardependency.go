@@ -2,7 +2,6 @@ package resolver
 
 import (
 	"fmt"
-	"math/big"
 
 	"git.noc.ruhr-uni-bochum.de/danieljankowski/gomatrix"
 )
@@ -20,73 +19,20 @@ func LinearDependenciesInGauss(
 	stopCol int,
 	pivotBit int,
 ) error {
-	// try to resolve the dependency with a row swap
-	err := resolveWithColSwap(f, startRow, startCol, stopRow, stopCol, pivotBit)
+	// resolve the linear dependency
+	err := resolveWithOptimizedAlgorithm(
+		f,
+		startRow,
+		startCol,
+		stopRow,
+		stopCol,
+		pivotBit,
+	)
 
-	// if the dependency is resolved...
-	if err == nil {
-		// ...return success
-		return nil
-	}
-
-	// try to resolve the dependency with a col swap
-	err = resolveWithRowSwap(f, startRow, startCol, stopRow, stopCol, pivotBit)
-
-	// return success
-	return err
-}
-
-// resolveWithRowSwap tries to resolve the linear dependency by swapping the row
-// with another one
-func resolveWithRowSwap(
-	f *gomatrix.F2,
-	startRow int,
-	startCol int,
-	stopRow int,
-	stopCol int,
-	pivotBit int,
-) error {
-	// create a bitmask for the row check
-	bitmask := big.NewInt(0).SetBit(big.NewInt(0), stopCol-startCol+1, 1)
-	bitmask = bitmask.Sub(bitmask, big.NewInt(1))
-	bitmask = bitmask.Lsh(bitmask, uint(startCol))
-
-	// initialize the indicator if a valid row is found
-	foundValidRow := false
-
-	// iterate through the rows
-	for index, row := range f.Rows {
-		// skip all rows, that are processed by the gaussian elimination
-		if index >= startRow && index <= stopRow {
-			continue
-		}
-
-		// get the bits to check
-		bitsToCheck := big.NewInt(0).And(
-			bitmask,
-			row,
-		)
-
-		// if the bits are 0...
-		if bitsToCheck.Cmp(big.NewInt(0)) == 0 {
-			// ...skip the row
-			continue
-		}
-
-		// swap the rows
-		f.SwapRows(pivotBit-1, index)
-
-		// a valid row was swapped into the right place
-		foundValidRow = true
-
-		// exit the loop
-		break
-	}
-
-	// if no valid row was found...
-	if !foundValidRow {
-		// ...return an error
-		return fmt.Errorf("cannot resolve linear dependency")
+	// if an error occured...
+	if err != nil {
+		// ...return it
+		return err
 	}
 
 	// apply the previous operations on the new row, with iterating through
@@ -109,9 +55,10 @@ func resolveWithRowSwap(
 	return nil
 }
 
-// resolveWithRowSwap tries to resolve the linear dependency by swapping the column
-// with another one
-func resolveWithColSwap(
+// resolveWithOptimizedAlgorithm tries to resolve the dependency with finding
+// an appropriate value that can be swapped right into the correct position
+// without destroying the already processed rows and columns.
+func resolveWithOptimizedAlgorithm(
 	f *gomatrix.F2,
 	startRow int,
 	startCol int,
@@ -119,40 +66,39 @@ func resolveWithColSwap(
 	stopCol int,
 	pivotBit int,
 ) error {
-	// get the current row as the pivot bit is indexed over the whole matrix
-	rowIndex := pivotBit - startCol
-
-	foundValidCol := false
-
-	// iterate through the colummns
-	for i := 0; i < f.M; i++ {
-		// skip the columns that are used in the gaussian elimination
-		if i >= startCol && i <= stopCol {
+	// iterate through the rows
+	for rowIndex := 0; rowIndex < f.N; rowIndex++ {
+		// if the rowindex points on to the already processed rows...
+		if rowIndex >= startRow && rowIndex <= startRow+pivotBit-startCol {
+			// ...skip it
 			continue
 		}
 
-		// if the bit is 0...
-		if f.Rows[rowIndex].Bit(i) == uint(0) {
-			// ...the row is skipped
-			continue
+		// iterate through the columns
+		for colIndex := 0; colIndex < f.M; colIndex++ {
+			// if the colindex points on to the already processed rows...
+			if colIndex >= startCol && colIndex < pivotBit {
+				// ...skip it
+				continue
+			}
+
+			// get the value at the current index
+			bit, err := f.At(rowIndex, colIndex)
+
+			// if an error occured or the bit is 0...
+			if err != nil || bit == 0 {
+				// ...skip it
+				continue
+			}
+
+			// swap the value into the right place
+			f.SwapRows(rowIndex, startRow+pivotBit-startCol)
+			f.SwapCols(colIndex, pivotBit)
+
+			// return success
+			return nil
 		}
-
-		// swap the columns
-		f.SwapCols(i, pivotBit)
-
-		// indicate that a correct column was swapped right into the place
-		foundValidCol = true
-
-		// break out of the loop
-		break
 	}
 
-	// if no valid column was found...
-	if !foundValidCol {
-		// ...return an error
-		return fmt.Errorf("cannot resolve linear dependency")
-	}
-
-	// return success
-	return nil
+	return fmt.Errorf("cannot resolve dependency")
 }

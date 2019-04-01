@@ -1,6 +1,7 @@
 package resolver
 
 import (
+	"fmt"
 	"math/big"
 	"testing"
 
@@ -90,7 +91,7 @@ func TestLinearDependenciesInGauss(t *testing.T) {
 				big.NewInt(10),
 				big.NewInt(13),
 				big.NewInt(0),
-				big.NewInt(1),
+				big.NewInt(0),
 			}),
 			startRow:      0,
 			startCol:      1,
@@ -129,6 +130,7 @@ func TestLinearDependenciesInGauss(t *testing.T) {
 	}
 
 	for _, test := range tests {
+		fmt.Printf("%s\n", test.description)
 		err := LinearDependenciesInGauss(
 			test.matrix,
 			test.startRow,
@@ -143,6 +145,8 @@ func TestLinearDependenciesInGauss(t *testing.T) {
 		if err != nil {
 			continue
 		}
+
+		test.matrix.PrintSlim()
 
 		assert.Truef(t, test.expectedResult.IsEqual(test.matrix), test.description)
 	}

@@ -109,7 +109,7 @@ func (f *F2) partialDiagonalize(startRow, startCol, stopRow, stopCol int) {
 		// choose each row from the top row to the one with the pivot bit
 		for rowCounter := startRow; rowCounter < stopRow; rowCounter++ {
 			// prevent xor with the row itself
-			if rowCounter == pivotBit-startCol {
+			if rowCounter == startRow+pivotBit-startCol {
 				continue
 			}
 
@@ -154,9 +154,9 @@ func (f *F2) PartialGaussianWithLinearChecking(
 			}
 
 			// if the row with a valid pivot bit is not the first row...
-			if pivotBit-startCol != rowCounter {
+			if startRow+pivotBit-startCol != rowCounter {
 				// ...swap it with first one
-				f.SwapRows(pivotBit-startCol, rowCounter)
+				f.SwapRows(startRow+pivotBit-startCol, rowCounter)
 			}
 
 			// iterate through all other rows except the first one

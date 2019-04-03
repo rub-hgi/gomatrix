@@ -45,8 +45,8 @@ func LinearDependenciesInGauss(
 		}
 
 		// remove the 1 with a xor operation with the relating row
-		f.Rows[pivotBit-startCol].Xor(
-			f.Rows[pivotBit-startCol],
+		f.Rows[startRow+pivotBit-startCol].Xor(
+			f.Rows[startRow+pivotBit-startCol],
 			f.Rows[startRow+i-startCol],
 		)
 	}

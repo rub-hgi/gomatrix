@@ -77,9 +77,9 @@ func (f *F2) PartialGaussianElimination(startRow, startCol, stopRow, stopCol int
 			}
 
 			// if the row with a valid pivot bit is not the first row...
-			if pivotBit-startCol != rowCounter {
+			if startRow+pivotBit-startCol != rowCounter {
 				// ...swap it with first one
-				f.SwapRows(pivotBit-startCol, rowCounter)
+				f.SwapRows(startRow+pivotBit-startCol, rowCounter)
 			}
 
 			// iterate through all other rows except the first one

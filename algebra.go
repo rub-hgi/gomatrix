@@ -41,7 +41,7 @@ func (f *F2) AddMatrix(m *F2) *F2 {
 // @return *F2
 func (f *F2) MulMatrix(m *F2) *F2 {
 	// if the dimensions do not fit for a multiplication...
-	if f.N != m.M {
+	if f.M != m.N {
 		// ...return an error
 		return nil
 	}
@@ -52,7 +52,7 @@ func (f *F2) MulMatrix(m *F2) *F2 {
 	// iterate through the rows of f
 	for i, row := range f.Rows {
 		// iterate through the columns of m
-		for j := 0; j < f.M; j++ {
+		for j := 0; j < m.M; j++ {
 			// get the column from the second matrix
 			col := m.GetCol(j)
 
@@ -68,6 +68,8 @@ func (f *F2) MulMatrix(m *F2) *F2 {
 	}
 
 	// save the result matrix in f
+	f.N = result.N
+	f.M = result.M
 	f.Rows = result.Rows
 
 	// return the result

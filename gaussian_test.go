@@ -116,7 +116,7 @@ func TestPartialGaussianWithLinearChecking(t *testing.T) {
 		startCol       int
 		stopRow        int
 		stopCol        int
-		linearCheck    func(*F2, int, int, int, int, int) error
+		linearCheck    func(*F2, *F2, int, int, int, int, int) (*F2, error)
 		expectedResult *F2
 		expectedError  bool
 	}{
@@ -132,7 +132,7 @@ func TestPartialGaussianWithLinearChecking(t *testing.T) {
 			startCol: 1,
 			stopRow:  2,
 			stopCol:  3,
-			linearCheck: func(f *F2, startRow, startCol, stopRow, stopCol, pivotBit int) error {
+			linearCheck: func(f, permMatrix *F2, startRow, startCol, stopRow, stopCol, pivotBit int) (*F2, error) {
 				// create a bitmask for the row check
 				bitmask := big.NewInt(0).SetBit(big.NewInt(0), stopCol-startCol+1, 1)
 				bitmask = bitmask.Sub(bitmask, big.NewInt(1))
@@ -169,7 +169,7 @@ func TestPartialGaussianWithLinearChecking(t *testing.T) {
 				}
 
 				if !foundValidRow {
-					return fmt.Errorf("cannot resolv linear dependency")
+					return nil, fmt.Errorf("cannot resolv linear dependency")
 				}
 
 				for i := startCol; i < pivotBit; i++ {
@@ -185,7 +185,7 @@ func TestPartialGaussianWithLinearChecking(t *testing.T) {
 					)
 				}
 
-				return nil
+				return permMatrix, nil
 			},
 			expectedResult: NewF2(4, 4).Set([]*big.Int{
 				big.NewInt(3),
@@ -207,8 +207,8 @@ func TestPartialGaussianWithLinearChecking(t *testing.T) {
 			startCol: 1,
 			stopRow:  2,
 			stopCol:  3,
-			linearCheck: func(f *F2, startRow, startCol, stopRow, stopCol, pivotBit int) error {
-				return fmt.Errorf("testfoo")
+			linearCheck: func(f, permMatrix *F2, startRow, startCol, stopRow, stopCol, pivotBit int) (*F2, error) {
+				return nil, fmt.Errorf("testfoo")
 			},
 			expectedResult: NewF2(4, 4).Set([]*big.Int{
 				big.NewInt(3),
@@ -230,8 +230,8 @@ func TestPartialGaussianWithLinearChecking(t *testing.T) {
 			startCol: 1,
 			stopRow:  2,
 			stopCol:  3,
-			linearCheck: func(f *F2, startRow, startCol, stopRow, stopCol, pivotBit int) error {
-				return fmt.Errorf("testfoo")
+			linearCheck: func(f, permMatrix *F2, startRow, startCol, stopRow, stopCol, pivotBit int) (*F2, error) {
+				return nil, fmt.Errorf("testfoo")
 			},
 			expectedResult: NewF2(4, 4).Set([]*big.Int{
 				big.NewInt(3),
@@ -244,7 +244,7 @@ func TestPartialGaussianWithLinearChecking(t *testing.T) {
 	}
 
 	for _, test := range tests {
-		err := test.matrix.PartialGaussianWithLinearChecking(
+		_, err := test.matrix.PartialGaussianWithLinearChecking(
 			test.startRow,
 			test.startCol,
 			test.stopRow,

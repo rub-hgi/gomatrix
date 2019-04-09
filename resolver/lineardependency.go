@@ -13,15 +13,17 @@ import (
 // using the function PartialGaussianWithLinearChecking as linearCheck-function.
 func LinearDependenciesInGauss(
 	f *gomatrix.F2,
+	permutationMatrix *gomatrix.F2,
 	startRow int,
 	startCol int,
 	stopRow int,
 	stopCol int,
 	pivotBit int,
-) error {
+) (*gomatrix.F2, error) {
 	// resolve the linear dependency
-	err := resolveWithOptimizedAlgorithm(
+	permutationMatrix, err := resolveWithOptimizedAlgorithm(
 		f,
+		permutationMatrix,
 		startRow,
 		startCol,
 		stopRow,
@@ -32,7 +34,7 @@ func LinearDependenciesInGauss(
 	// if an error occured...
 	if err != nil {
 		// ...return it
-		return err
+		return nil, err
 	}
 
 	// apply the previous operations on the new row, with iterating through
@@ -52,7 +54,7 @@ func LinearDependenciesInGauss(
 	}
 
 	// return success
-	return nil
+	return permutationMatrix, nil
 }
 
 // resolveWithOptimizedAlgorithm tries to resolve the dependency with finding
@@ -60,12 +62,13 @@ func LinearDependenciesInGauss(
 // without destroying the already processed rows and columns.
 func resolveWithOptimizedAlgorithm(
 	f *gomatrix.F2,
+	permutationMatrix *gomatrix.F2,
 	startRow int,
 	startCol int,
 	stopRow int,
 	stopCol int,
 	pivotBit int,
-) error {
+) (*gomatrix.F2, error) {
 	// iterate through the rows
 	for rowIndex := 0; rowIndex < f.N; rowIndex++ {
 		// if the rowindex points on to the already processed rows...
@@ -95,10 +98,14 @@ func resolveWithOptimizedAlgorithm(
 			f.SwapRows(rowIndex, startRow+pivotBit-startCol)
 			f.SwapCols(colIndex, pivotBit)
 
+			// swap the rows in the permutation matrix
+			permutationMatrix.SwapRows(rowIndex, startRow+pivotBit-startCol)
+			permutationMatrix.SwapCols(colIndex, pivotBit)
+
 			// return success
-			return nil
+			return permutationMatrix, nil
 		}
 	}
 
-	return fmt.Errorf("cannot resolve dependency")
+	return nil, fmt.Errorf("cannot resolve dependency")
 }

@@ -131,8 +131,9 @@ func TestLinearDependenciesInGauss(t *testing.T) {
 
 	for _, test := range tests {
 		fmt.Printf("%s\n", test.description)
-		err := LinearDependenciesInGauss(
+		_, err := LinearDependenciesInGauss(
 			test.matrix,
+			gomatrix.NewF2(test.matrix.N, test.matrix.N).SetToIdentity(),
 			test.startRow,
 			test.startCol,
 			test.stopRow,

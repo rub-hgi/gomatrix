@@ -132,14 +132,22 @@ func (f *F2) partialDiagonalize(startRow, startCol, stopRow, stopCol int) {
 //
 // This function performs a gaussian elimination on the matrix and calls the
 // check callback after each iteration in order to verify that linear
-// dependencies in the code could be resolved easily.
+// dependencies in the code could be resolved easily. The function returns
+// the permutation matrix in addition to the error. For the linearCheck
+// callback take a look at the resolver package.
 func (f *F2) PartialGaussianWithLinearChecking(
 	startRow int,
 	startCol int,
 	stopRow int,
 	stopCol int,
-	linearCheck func(*F2, int, int, int, int, int) error,
-) error {
+	linearCheck func(*F2, *F2, int, int, int, int, int) (*F2, error),
+) (*F2, error) {
+	// initialize the permutation matrix
+	permutationMatrix := NewF2(f.N, f.N).SetToIdentity()
+
+	// initialize the error vector
+	var err error
+
 	// iterate through all possible pivot bits
 	for pivotBit := startCol; pivotBit <= stopCol; pivotBit++ {
 		// intialize the pivotbit indicator
@@ -186,8 +194,9 @@ func (f *F2) PartialGaussianWithLinearChecking(
 		}
 
 		// detect linear dependencies and try to resolve them
-		err := linearCheck(
+		permutationMatrix, err = linearCheck(
 			f,
+			permutationMatrix,
 			startRow,
 			startCol,
 			stopRow,
@@ -197,7 +206,7 @@ func (f *F2) PartialGaussianWithLinearChecking(
 
 		// check the error
 		if err != nil {
-			return err
+			return nil, err
 		}
 
 		// process the same row again
@@ -207,7 +216,7 @@ func (f *F2) PartialGaussianWithLinearChecking(
 	// do the same thing backwards to get the identity matrix
 	f.partialDiagonalize(startRow, startCol, stopRow, stopCol)
 
-	return nil
+	return permutationMatrix, nil
 }
 
 // CheckGaussian checks if the given range in the matrix is the identity matrix

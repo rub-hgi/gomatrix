@@ -56,7 +56,7 @@ func TestMulMatrix(t *testing.T) {
 		},
 		{
 			description:    "invalid multiplication",
-			matrixA:        NewF2(2, 2).Set([]*big.Int{big.NewInt(2), big.NewInt(1)}),
+			matrixA:        NewF2(2, 4).Set([]*big.Int{big.NewInt(2), big.NewInt(1)}),
 			matrixB:        NewF2(2, 3).Set([]*big.Int{big.NewInt(1), big.NewInt(3)}),
 			expectedMatrix: nil,
 		},

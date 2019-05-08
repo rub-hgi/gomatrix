@@ -4,6 +4,7 @@
 [![pipeline status](https://git.noc.ruhr-uni-bochum.de/danieljankowski/gomatrix/badges/master/pipeline.svg)](https://git.noc.ruhr-uni-bochum.de/danieljankowski/gomatrix/commits/master)
 [![coverage report](https://git.noc.ruhr-uni-bochum.de/danieljankowski/gomatrix/badges/master/coverage.svg)](https://git.noc.ruhr-uni-bochum.de/danieljankowski/gomatrix/commits/master)
 [![Go Report Card](https://goreportcard.com/badge/git.noc.ruhr-uni-bochum.de/danieljankowski/gomatrix)](https://goreportcard.com/report/git.noc.ruhr-uni-bochum.de/danieljankowski/gomatrix)
+[![License MIT](https://img.shields.io/badge/License-MIT-brightgreen.svg)](https://img.shields.io/badge/License-MIT-brightgreen.svg)
 
 
 A go package for scientific matrix operations.

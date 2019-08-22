@@ -372,6 +372,11 @@ func TestPermuteCols(t *testing.T) {
 
 		var permMat *F2
 
+		savedMat := NewF2(
+			test.matrixA.N,
+			test.matrixA.M,
+		).Set(test.matrixA.Rows)
+
 		for test.matrixA.IsEqual(test.notExpectedMatrix) && repeats < test.maxRepeats {
 			repeats++
 
@@ -380,6 +385,10 @@ func TestPermuteCols(t *testing.T) {
 
 		assert.False(t, test.matrixA.IsEqual(test.notExpectedMatrix))
 		assert.NotNil(t, permMat)
+
+		test.matrixA.MulMatrix(permMat.T())
+
+		assert.True(t, test.matrixA.IsEqual(savedMat))
 	}
 }
 

@@ -51,6 +51,11 @@ func LinearDependenciesInGauss(
 			f.Rows[startRow+pivotBit-startCol],
 			f.Rows[startRow+i-startCol],
 		)
+
+		permutationMatrix.Rows[startRow+pivotBit-startCol].Xor(
+			permutationMatrix.Rows[startRow+pivotBit-startCol],
+			permutationMatrix.Rows[startRow+i-startCol],
+		)
 	}
 
 	// return success

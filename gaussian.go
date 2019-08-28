@@ -100,10 +100,10 @@ func (f *F2) PartialGaussianElimination(startRow, startCol, stopRow, stopCol int
 	}
 
 	// do the same thing backwards to get the identity matrix
-	f.partialDiagonalize(startRow, startCol, stopRow, stopCol)
+	f.partialDiagonalize(startRow, startCol, stopRow, stopCol, nil)
 }
 
-func (f *F2) partialDiagonalize(startRow, startCol, stopRow, stopCol int) {
+func (f *F2) partialDiagonalize(startRow, startCol, stopRow, stopCol int, permutationMatrix *F2) *F2 {
 	// iterate backwards through the pivot bits
 	for pivotBit := stopCol; pivotBit >= startCol; pivotBit-- {
 		// choose each row from the top row to the one with the pivot bit
@@ -124,8 +124,20 @@ func (f *F2) partialDiagonalize(startRow, startCol, stopRow, stopCol int) {
 				f.Rows[rowCounter],
 				f.Rows[startRow+pivotBit-startCol],
 			)
+
+			if permutationMatrix == nil {
+				continue
+			}
+
+			// eliminate the 1
+			permutationMatrix.Rows[rowCounter].Xor(
+				permutationMatrix.Rows[rowCounter],
+				permutationMatrix.Rows[startRow+pivotBit-startCol],
+			)
 		}
 	}
+
+	return permutationMatrix
 }
 
 // PartialGaussianWithLinearChecking performs a partial gaussian elimination
@@ -165,6 +177,7 @@ func (f *F2) PartialGaussianWithLinearChecking(
 			if startRow+pivotBit-startCol != rowCounter {
 				// ...swap it with first one
 				f.SwapRows(startRow+pivotBit-startCol, rowCounter)
+				permutationMatrix.SwapRows(startRow+pivotBit-startCol, rowCounter)
 			}
 
 			// iterate through all other rows except the first one
@@ -177,6 +190,10 @@ func (f *F2) PartialGaussianWithLinearChecking(
 				f.Rows[rr].Xor(
 					f.Rows[rr],
 					f.Rows[startRow+pivotBit-startCol],
+				)
+				permutationMatrix.Rows[rr].Xor(
+					permutationMatrix.Rows[rr],
+					permutationMatrix.Rows[startRow+pivotBit-startCol],
 				)
 			}
 
@@ -214,7 +231,7 @@ func (f *F2) PartialGaussianWithLinearChecking(
 	}
 
 	// do the same thing backwards to get the identity matrix
-	f.partialDiagonalize(startRow, startCol, stopRow, stopCol)
+	permutationMatrix = f.partialDiagonalize(startRow, startCol, stopRow, stopCol, permutationMatrix)
 
 	return permutationMatrix, nil
 }

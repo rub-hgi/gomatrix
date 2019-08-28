@@ -161,6 +161,7 @@ func TestPartialGaussianWithLinearChecking(t *testing.T) {
 
 					// swap the rows
 					f.SwapRows(pivotBit-1, index)
+					permMatrix.SwapRows(pivotBit-1, index)
 
 					foundValidRow = true
 
@@ -169,7 +170,7 @@ func TestPartialGaussianWithLinearChecking(t *testing.T) {
 				}
 
 				if !foundValidRow {
-					return nil, fmt.Errorf("cannot resolv linear dependency")
+					return nil, fmt.Errorf("cannot resolve linear dependency")
 				}
 
 				for i := startCol; i < pivotBit; i++ {
@@ -182,6 +183,11 @@ func TestPartialGaussianWithLinearChecking(t *testing.T) {
 					f.Rows[pivotBit-startCol].Xor(
 						f.Rows[pivotBit-startCol],
 						f.Rows[startRow+i-startCol],
+					)
+
+					permMatrix.Rows[pivotBit-startCol].Xor(
+						permMatrix.Rows[pivotBit-startCol],
+						permMatrix.Rows[startRow+i-startCol],
 					)
 				}
 
@@ -244,7 +250,14 @@ func TestPartialGaussianWithLinearChecking(t *testing.T) {
 	}
 
 	for _, test := range tests {
-		_, err := test.matrix.PartialGaussianWithLinearChecking(
+		savedMatrix := NewF2(
+			test.matrix.N,
+			test.matrix.M,
+		).Set(
+			test.matrix.Rows,
+		)
+
+		permMatrix, err := test.matrix.PartialGaussianWithLinearChecking(
 			test.startRow,
 			test.startCol,
 			test.stopRow,
@@ -261,6 +274,12 @@ func TestPartialGaussianWithLinearChecking(t *testing.T) {
 		}
 
 		assert.Truef(t, test.expectedResult.IsEqual(test.matrix), test.description)
+
+		// apply the transformation matrix on the origin matrix
+		permMatrix = permMatrix.MulMatrix(savedMatrix)
+
+		// verify the result is correct
+		assert.Truef(t, permMatrix.IsEqual(test.matrix), test.description)
 	}
 }
 

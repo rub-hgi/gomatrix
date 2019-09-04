@@ -116,7 +116,7 @@ func TestPartialGaussianWithLinearChecking(t *testing.T) {
 		startCol       int
 		stopRow        int
 		stopCol        int
-		linearCheck    func(*F2, *F2, int, int, int, int, int) (*F2, error)
+		linearCheck    func(*F2, *F2, *F2, int, int, int, int, int) (*F2, *F2, error)
 		expectedResult *F2
 		expectedError  bool
 	}{
@@ -132,7 +132,7 @@ func TestPartialGaussianWithLinearChecking(t *testing.T) {
 			startCol: 1,
 			stopRow:  2,
 			stopCol:  3,
-			linearCheck: func(f, permMatrix *F2, startRow, startCol, stopRow, stopCol, pivotBit int) (*F2, error) {
+			linearCheck: func(f, gaussMatrix, permMatrix *F2, startRow, startCol, stopRow, stopCol, pivotBit int) (*F2, *F2, error) {
 				// create a bitmask for the row check
 				bitmask := big.NewInt(0).SetBit(big.NewInt(0), stopCol-startCol+1, 1)
 				bitmask = bitmask.Sub(bitmask, big.NewInt(1))
@@ -161,7 +161,7 @@ func TestPartialGaussianWithLinearChecking(t *testing.T) {
 
 					// swap the rows
 					f.SwapRows(pivotBit-1, index)
-					permMatrix.SwapRows(pivotBit-1, index)
+					gaussMatrix.SwapRows(pivotBit-1, index)
 
 					foundValidRow = true
 
@@ -170,7 +170,7 @@ func TestPartialGaussianWithLinearChecking(t *testing.T) {
 				}
 
 				if !foundValidRow {
-					return nil, fmt.Errorf("cannot resolve linear dependency")
+					return nil, nil, fmt.Errorf("cannot resolve linear dependency")
 				}
 
 				for i := startCol; i < pivotBit; i++ {
@@ -185,13 +185,13 @@ func TestPartialGaussianWithLinearChecking(t *testing.T) {
 						f.Rows[startRow+i-startCol],
 					)
 
-					permMatrix.Rows[pivotBit-startCol].Xor(
-						permMatrix.Rows[pivotBit-startCol],
-						permMatrix.Rows[startRow+i-startCol],
+					gaussMatrix.Rows[pivotBit-startCol].Xor(
+						gaussMatrix.Rows[pivotBit-startCol],
+						gaussMatrix.Rows[startRow+i-startCol],
 					)
 				}
 
-				return permMatrix, nil
+				return gaussMatrix, permMatrix, nil
 			},
 			expectedResult: NewF2(4, 4).Set([]*big.Int{
 				big.NewInt(3),
@@ -213,8 +213,8 @@ func TestPartialGaussianWithLinearChecking(t *testing.T) {
 			startCol: 1,
 			stopRow:  2,
 			stopCol:  3,
-			linearCheck: func(f, permMatrix *F2, startRow, startCol, stopRow, stopCol, pivotBit int) (*F2, error) {
-				return nil, fmt.Errorf("testfoo")
+			linearCheck: func(f, gaussMatrix, permMatrix *F2, startRow, startCol, stopRow, stopCol, pivotBit int) (*F2, *F2, error) {
+				return nil, nil, fmt.Errorf("testfoo")
 			},
 			expectedResult: NewF2(4, 4).Set([]*big.Int{
 				big.NewInt(3),
@@ -236,8 +236,8 @@ func TestPartialGaussianWithLinearChecking(t *testing.T) {
 			startCol: 1,
 			stopRow:  2,
 			stopCol:  3,
-			linearCheck: func(f, permMatrix *F2, startRow, startCol, stopRow, stopCol, pivotBit int) (*F2, error) {
-				return nil, fmt.Errorf("testfoo")
+			linearCheck: func(f, gaussMatrix, permMatrix *F2, startRow, startCol, stopRow, stopCol, pivotBit int) (*F2, *F2, error) {
+				return nil, nil, fmt.Errorf("testfoo")
 			},
 			expectedResult: NewF2(4, 4).Set([]*big.Int{
 				big.NewInt(3),
@@ -246,6 +246,85 @@ func TestPartialGaussianWithLinearChecking(t *testing.T) {
 				big.NewInt(1),
 			}),
 			expectedError: true,
+		},
+		{
+			description: "3x4 with one swap",
+			matrix: NewF2(3, 4).Set([]*big.Int{
+				big.NewInt(3),
+				big.NewInt(15),
+				big.NewInt(5),
+			}),
+			startRow: 1,
+			startCol: 2,
+			stopRow:  2,
+			stopCol:  3,
+			linearCheck: func(f, gaussMatrix, permMatrix *F2, startRow, startCol, stopRow, stopCol, pivotBit int) (*F2, *F2, error) {
+				// create a bitmask for the row check
+				bitmask := big.NewInt(0).SetBit(big.NewInt(0), stopCol-startCol+1, 1)
+				bitmask = bitmask.Sub(bitmask, big.NewInt(1))
+				bitmask = bitmask.Lsh(bitmask, uint(startCol))
+
+				foundValidRow := false
+
+				// iterate through the rows
+				for index, row := range f.Rows {
+					// skip all rows, that are processed by the gaussian elimination
+					if index >= startRow && index <= stopRow {
+						continue
+					}
+
+					// get the bits to check
+					bitsToCheck := big.NewInt(0).And(
+						bitmask,
+						row,
+					)
+
+					// if the bits are 0...
+					if bitsToCheck.Cmp(big.NewInt(0)) == 0 {
+						// ...skip the row
+						continue
+					}
+
+					// swap the rows
+					f.SwapRows(pivotBit-1, index)
+					gaussMatrix.SwapRows(pivotBit-1, index)
+
+					foundValidRow = true
+
+					// exit the loop
+					break
+				}
+
+				if !foundValidRow {
+					return nil, nil, fmt.Errorf("cannot resolve linear dependency")
+				}
+
+				for i := startCol; i < pivotBit; i++ {
+					if f.Rows[pivotBit-startCol].Bit(i) == uint(0) {
+						continue
+					}
+
+					fmt.Printf("%d xor %d\n", pivotBit-startCol, startRow+i-startCol)
+
+					f.Rows[pivotBit-startCol].Xor(
+						f.Rows[pivotBit-startCol],
+						f.Rows[startRow+i-startCol],
+					)
+
+					gaussMatrix.Rows[pivotBit-startCol].Xor(
+						gaussMatrix.Rows[pivotBit-startCol],
+						gaussMatrix.Rows[startRow+i-startCol],
+					)
+				}
+
+				return gaussMatrix, permMatrix, nil
+			},
+			expectedResult: NewF2(3, 4).Set([]*big.Int{
+				big.NewInt(3),
+				big.NewInt(5),
+				big.NewInt(10),
+			}),
+			expectedError: false,
 		},
 	}
 
@@ -257,7 +336,7 @@ func TestPartialGaussianWithLinearChecking(t *testing.T) {
 			test.matrix.Rows,
 		)
 
-		permMatrix, err := test.matrix.PartialGaussianWithLinearChecking(
+		gaussMatrix, _, err := test.matrix.PartialGaussianWithLinearChecking(
 			test.startRow,
 			test.startCol,
 			test.stopRow,
@@ -265,6 +344,7 @@ func TestPartialGaussianWithLinearChecking(t *testing.T) {
 			test.linearCheck,
 		)
 
+		fmt.Printf(":: processed matrix\n")
 		test.matrix.PrettyPrint()
 
 		assert.Equalf(t, test.expectedError, err != nil, test.description)
@@ -276,10 +356,13 @@ func TestPartialGaussianWithLinearChecking(t *testing.T) {
 		assert.Truef(t, test.expectedResult.IsEqual(test.matrix), test.description)
 
 		// apply the transformation matrix on the origin matrix
-		permMatrix = permMatrix.MulMatrix(savedMatrix)
+		gaussMatrix = gaussMatrix.MulMatrix(savedMatrix)
+
+		fmt.Printf(":: gaussMatrix * savedMatrix\n")
+		gaussMatrix.PrintSlim()
 
 		// verify the result is correct
-		assert.Truef(t, permMatrix.IsEqual(test.matrix), test.description)
+		assert.Truef(t, gaussMatrix.IsEqual(test.matrix), test.description)
 	}
 }
 

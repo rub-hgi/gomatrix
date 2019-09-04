@@ -13,13 +13,14 @@ import (
 // using the function PartialGaussianWithLinearChecking as linearCheck-function.
 func LinearDependenciesInGauss(
 	f *gomatrix.F2,
+	gaussMatrix *gomatrix.F2,
 	permutationMatrix *gomatrix.F2,
 	startRow int,
 	startCol int,
 	stopRow int,
 	stopCol int,
 	pivotBit int,
-) (*gomatrix.F2, error) {
+) (*gomatrix.F2, *gomatrix.F2, error) {
 	// resolve the linear dependency
 	permutationMatrix, err := resolveWithOptimizedAlgorithm(
 		f,
@@ -34,7 +35,7 @@ func LinearDependenciesInGauss(
 	// if an error occured...
 	if err != nil {
 		// ...return it
-		return nil, err
+		return nil, nil, err
 	}
 
 	// apply the previous operations on the new row, with iterating through
@@ -52,14 +53,14 @@ func LinearDependenciesInGauss(
 			f.Rows[startRow+i-startCol],
 		)
 
-		permutationMatrix.Rows[startRow+pivotBit-startCol].Xor(
-			permutationMatrix.Rows[startRow+pivotBit-startCol],
-			permutationMatrix.Rows[startRow+i-startCol],
+		gaussMatrix.Rows[startRow+pivotBit-startCol].Xor(
+			gaussMatrix.Rows[startRow+pivotBit-startCol],
+			gaussMatrix.Rows[startRow+i-startCol],
 		)
 	}
 
 	// return success
-	return permutationMatrix, nil
+	return gaussMatrix, permutationMatrix, nil
 }
 
 // resolveWithOptimizedAlgorithm tries to resolve the dependency with finding

@@ -35,8 +35,6 @@ func (f *F2) GaussianElimination() {
 				f.Rows[rr].Xor(f.Rows[rr], f.Rows[pivotBit])
 			}
 		}
-
-		//TODO: detect linear dependency
 	}
 
 	// do the same thing backwards to get the identity matrix
@@ -103,7 +101,7 @@ func (f *F2) PartialGaussianElimination(startRow, startCol, stopRow, stopCol int
 	f.partialDiagonalize(startRow, startCol, stopRow, stopCol, nil)
 }
 
-func (f *F2) partialDiagonalize(startRow, startCol, stopRow, stopCol int, permutationMatrix *F2) *F2 {
+func (f *F2) partialDiagonalize(startRow, startCol, stopRow, stopCol int, gaussMatrix *F2) *F2 {
 	// iterate backwards through the pivot bits
 	for pivotBit := stopCol; pivotBit >= startCol; pivotBit-- {
 		// choose each row from the top row to the one with the pivot bit
@@ -125,19 +123,19 @@ func (f *F2) partialDiagonalize(startRow, startCol, stopRow, stopCol int, permut
 				f.Rows[startRow+pivotBit-startCol],
 			)
 
-			if permutationMatrix == nil {
+			if gaussMatrix == nil {
 				continue
 			}
 
 			// eliminate the 1
-			permutationMatrix.Rows[rowCounter].Xor(
-				permutationMatrix.Rows[rowCounter],
-				permutationMatrix.Rows[startRow+pivotBit-startCol],
+			gaussMatrix.Rows[rowCounter].Xor(
+				gaussMatrix.Rows[rowCounter],
+				gaussMatrix.Rows[startRow+pivotBit-startCol],
 			)
 		}
 	}
 
-	return permutationMatrix
+	return gaussMatrix
 }
 
 // PartialGaussianWithLinearChecking performs a partial gaussian elimination
@@ -152,10 +150,11 @@ func (f *F2) PartialGaussianWithLinearChecking(
 	startCol int,
 	stopRow int,
 	stopCol int,
-	linearCheck func(*F2, *F2, int, int, int, int, int) (*F2, error),
-) (*F2, error) {
+	linearCheck func(*F2, *F2, *F2, int, int, int, int, int) (*F2, *F2, error),
+) (*F2, *F2, error) {
 	// initialize the permutation matrix
-	permutationMatrix := NewF2(f.N, f.N).SetToIdentity()
+	gaussMatrix := NewF2(f.N, f.N).SetToIdentity()
+	permutationMatrix := NewF2(f.M, f.M).SetToIdentity()
 
 	// initialize the error vector
 	var err error
@@ -177,7 +176,7 @@ func (f *F2) PartialGaussianWithLinearChecking(
 			if startRow+pivotBit-startCol != rowCounter {
 				// ...swap it with first one
 				f.SwapRows(startRow+pivotBit-startCol, rowCounter)
-				permutationMatrix.SwapRows(startRow+pivotBit-startCol, rowCounter)
+				gaussMatrix.SwapRows(startRow+pivotBit-startCol, rowCounter)
 			}
 
 			// iterate through all other rows except the first one
@@ -191,9 +190,9 @@ func (f *F2) PartialGaussianWithLinearChecking(
 					f.Rows[rr],
 					f.Rows[startRow+pivotBit-startCol],
 				)
-				permutationMatrix.Rows[rr].Xor(
-					permutationMatrix.Rows[rr],
-					permutationMatrix.Rows[startRow+pivotBit-startCol],
+				gaussMatrix.Rows[rr].Xor(
+					gaussMatrix.Rows[rr],
+					gaussMatrix.Rows[startRow+pivotBit-startCol],
 				)
 			}
 
@@ -211,8 +210,9 @@ func (f *F2) PartialGaussianWithLinearChecking(
 		}
 
 		// detect linear dependencies and try to resolve them
-		permutationMatrix, err = linearCheck(
+		gaussMatrix, permutationMatrix, err = linearCheck(
 			f,
+			gaussMatrix,
 			permutationMatrix,
 			startRow,
 			startCol,
@@ -223,7 +223,7 @@ func (f *F2) PartialGaussianWithLinearChecking(
 
 		// check the error
 		if err != nil {
-			return nil, err
+			return nil, nil, err
 		}
 
 		// process the same row again
@@ -231,9 +231,9 @@ func (f *F2) PartialGaussianWithLinearChecking(
 	}
 
 	// do the same thing backwards to get the identity matrix
-	permutationMatrix = f.partialDiagonalize(startRow, startCol, stopRow, stopCol, permutationMatrix)
+	gaussMatrix = f.partialDiagonalize(startRow, startCol, stopRow, stopCol, gaussMatrix)
 
-	return permutationMatrix, nil
+	return gaussMatrix, permutationMatrix, nil
 }
 
 // CheckGaussian checks if the given range in the matrix is the identity matrix

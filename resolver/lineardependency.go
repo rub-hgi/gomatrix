@@ -22,8 +22,9 @@ func LinearDependenciesInGauss(
 	pivotBit int,
 ) (*gomatrix.F2, *gomatrix.F2, error) {
 	// resolve the linear dependency
-	permutationMatrix, err := resolveWithOptimizedAlgorithm(
+	gaussMatrix, permutationMatrix, err := resolveWithOptimizedAlgorithm(
 		f,
+		gaussMatrix,
 		permutationMatrix,
 		startRow,
 		startCol,
@@ -68,13 +69,14 @@ func LinearDependenciesInGauss(
 // without destroying the already processed rows and columns.
 func resolveWithOptimizedAlgorithm(
 	f *gomatrix.F2,
+	gaussMatrix *gomatrix.F2,
 	permutationMatrix *gomatrix.F2,
 	startRow int,
 	startCol int,
 	stopRow int,
 	stopCol int,
 	pivotBit int,
-) (*gomatrix.F2, error) {
+) (*gomatrix.F2, *gomatrix.F2, error) {
 	// iterate through the rows
 	for rowIndex := 0; rowIndex < f.N; rowIndex++ {
 		// if the rowindex points on to the already processed rows...
@@ -105,13 +107,13 @@ func resolveWithOptimizedAlgorithm(
 			f.SwapCols(colIndex, pivotBit)
 
 			// swap the rows in the permutation matrix
-			permutationMatrix.SwapRows(rowIndex, startRow+pivotBit-startCol)
+			gaussMatrix.SwapRows(rowIndex, startRow+pivotBit-startCol)
 			permutationMatrix.SwapCols(colIndex, pivotBit)
 
 			// return success
-			return permutationMatrix, nil
+			return gaussMatrix, permutationMatrix, nil
 		}
 	}
 
-	return nil, fmt.Errorf("cannot resolve dependency")
+	return nil, nil, fmt.Errorf("cannot resolve dependency")
 }

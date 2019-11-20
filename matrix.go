@@ -2,9 +2,9 @@
 package gomatrix
 
 import (
-	"crypto/rand"
 	"fmt"
 	"math/big"
+	"math/rand"
 )
 
 // F2 represents a matrix with entries that contains 0 or 1
@@ -295,18 +295,18 @@ func (f *F2) PermuteCols() *F2 {
 	// repeat the swaps
 	for i := 0; i < f.M; i++ {
 		// get a random column destination index
-		j, _ := rand.Int(rand.Reader, big.NewInt(int64(f.M)))
+		j := rand.Intn(f.M-i) + i
 
 		// check if the column is swapped or not
-		if int64(i) == j.Int64() {
+		if i == j {
 			continue
 		}
 
 		// swap the columns in f
-		f.SwapCols(i, int(j.Int64()))
+		f.SwapCols(i, j)
 
 		// swap the columns in the permutation matrix
-		permutationMatrix.SwapCols(i, int(j.Int64()))
+		permutationMatrix.SwapCols(i, j)
 	}
 
 	// return the permutation matrix
